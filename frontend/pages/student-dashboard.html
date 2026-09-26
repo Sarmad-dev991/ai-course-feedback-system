@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="brand">
+
+            <div class="logo">
+                CS
+            </div>
+            <div>
+                CS TECHNOLOGIES
+                <small>RAWALPINDI</small>
+            </div>
+        </div>
+
+        <a href="student-dashboard.html" class="nav-link-custom active">Dashboard</a>
+        <a href="my-courses.html" class="nav-link-custom">My Courses</a>
+        <a href="course-information.html" class="nav-link-custom">Feedback</a>
+        <a href="submission-confirmation.html" class="nav-link-custom">Submitted</a>
+        <a href="profile-settings.html" class="nav-link-custom">Profile</a>
+        <a href="profile-settings.html" class="nav-link-custom">Settings</a>
+
+        <div class="logout">
+            <a href="login.html" class="nav-link-custom">Logout</a>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div class="brand">
+
+                <div class="logo">
+                    CS
+                </div>
+                <div>
+                    CS TECHNOLOGIES
+                    <small>RAWALPINDI</small>
+                </div>
+            </div>
+            <b>Ali Hassan</b>
+        </header>
+
+        <section class="content">
+            <div class="d-flex justify-content-between mb-4">
+
+                <div>
+                    <h2 class="title">Welcome, Ali Hassan 👋</h2>
+                    <p class="muted">Here is your feedback overview.</p>
+                </div>
+
+                <button class="btn btn-outline-primary" data-go="profile-settings.html">My Profile</button>
+            </div>
+
+            <!-- STATS -->
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-lg-3">
+
+                    <div class="card-custom">
+
+                        <small class="muted">
+                            Pending Evaluations
+                        </small>
+                        <div class="kpi">
+                            2
+                        </div>
+                        <small class="muted">
+                            Courses
+                        </small>
+                    </div>
+                </div>
+
+                <div class="col-6 col-lg-3">
+                    <div class="card-custom">
+
+                        <small class="muted">
+                            Submitted Evaluations
+                        </small>
+                        <div class="kpi">
+                            4
+                        </div>
+                        <small class="muted">
+                            Courses
+                        </small>
+                    </div>
+                </div>
+
+                <div class="col-6 col-lg-3">
+                    <div class="card-custom">
+
+                        <small class="muted">
+                            Total Courses
+                        </small>
+                        <div class="kpi">
+                            6
+                        </div>
+                        <small class="muted">
+                            Enrolled
+                        </small>
+                    </div>
+                </div>
+
+                <div class="col-6 col-lg-3">
+                    <div class="card-custom">
+
+                        <small class="muted">
+                            Completion Rate
+                        </small>
+                        <div class="kpi">
+                            66%
+                        </div>
+                        <small class="muted">
+                            This Period
+                        </small>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- PENDING -->
+            <div class="card-custom mb-4">
+                <h5 class="title">
+                    Pending Evaluations
+                </h5>
+
+                <div class="border rounded p-3 mt-3">
+                    <div class="row align-items-center">
+
+                        <div class="col-lg-7">
+                            <h6 class="title">
+                                Web Development
+                            </h6>
+                            <small class="muted">
+                                Batch: WD-12 |
+                                Instructor: Mr. Usman
+                            </small>
+                        </div>
+
+                        <div class="col-lg-5 text-lg-end mt-3 mt-lg-0">
+                            <span class="badge-soft badge-red">
+                                Due: 15 May 2025
+                            </span>
+                            <button class="btn btn-navy btn-sm" data-go="course-information.html">
+                                Give Feedback →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border rounded p-3 mt-3">
+                    <div class="row align-items-center">
+
+                        <div class="col-lg-7">
+                            <h6 class="title">
+                                Database Systems
+                            </h6>
+                            <small class="muted">
+                                Batch: DB-08 |
+                                Instructor: Ms. Ayesha
+                            </small>
+                        </div>
+
+                        <div class="col-lg-5 text-lg-end mt-3 mt-lg-0">
+                            <span class="badge-soft badge-red">
+                                Due: 18 May 2025
+                            </span>
+                            <button class="btn btn-navy btn-sm" data-go="course-information.html">
+                                Give Feedback →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RECENT -->
+            <div class="card-custom">
+                <div class="d-flex justify-content-between">
+                    <h5 class="title">
+                        Recently Submitted
+                    </h5>
+                    <a href="my-courses.html">
+                        View All
+                    </a>
+                </div>
+
+                <div class="table-responsive mt-3">
+                    <table class="table-custom">
+                        <tr>
+                            <th>Course</th>
+                            <th>Batch</th>
+                            <th>Instructor</th>
+                            <th>Submitted On</th>
+                            <th>Status</th>
+                        </tr>
+                        <tr>
+                            <td>UI/UX Design</td>
+                            <td>UX-10</td>
+                            <td>Mr. Bilal</td>
+                            <td>10 May 2025</td>
+                            <td>
+                                <span class="badge-soft badge-green">
+                                    Completed
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Python Programming</td>
+                            <td>PY-21</td>
+                            <td>Mr. Hamza</td>
+                            <td>08 May 2025</td>
+                            <td>
+                                <span class="badge-soft badge-green">
+                                    Completed
+                                </span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="../js/app.js"></script>
+
+</body>
+
+</html>

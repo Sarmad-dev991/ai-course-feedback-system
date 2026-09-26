@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="logo">CS</div>
+
+            <div>
+                CS TECHNOLOGIES
+                <small>RAWALPINDI</small>
+            </div>
+
+        </div>
+        <a href="admin-dashboard.html" class="nav-link-custom">Dashboard</a>
+        <a href="admin-courses.html" class="nav-link-custom active">Courses</a>
+        <a href="ai-insights.html" class="nav-link-custom">AI Insights</a>
+        <a href="reports.html" class="nav-link-custom">Reports</a>
+        <a href="audit-logs.html" class="nav-link-custom">Audit Logs</a>
+
+        <div class="logout">
+            <a href="login.html" class="nav-link-custom">Logout</a>
+        </div>
+
+    </aside>
+    <main class="main">
+        <header class="topbar">
+            <div class="brand">
+                <div class="logo">
+                    CS
+                </div>
+
+                <div>
+                    CS TECHNOLOGIES
+                    <small>RAWALPINDI</small>
+                </div>
+
+            </div>
+
+            <b>Admin</b>
+        </header>
+
+
+        <section class="content">
+            <div class="d-flex justify-content-between mb-4">
+
+                <div>
+                    <h2 class="title">Courses</h2>
+                    <p class="muted">Manage all courses offered by the institute.</p>
+                </div>
+
+
+                <button class="btn btn-primary">+ Add New Course</button>
+            </div>
+
+            <div class="card-custom">
+                <div class="row g-2 mb-3">
+                    <div class="col-md-6">
+
+                        <input class="form-control" id="adminCourseSearch" placeholder="Search courses...">
+
+                    </div>
+
+                    <div class="col-md-3">
+
+                        <select class="form-select">
+                            <option>All Categories</option>
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-3">
+
+                        <select class="form-select">
+                            <option>Status: Active</option>
+                        </select>
+                    </div>
+
+                </div>
+
+
+                <div class="table-responsive">
+                    <table class="table-custom">
+
+                        <tr>
+                            <th>#</th>
+                            <th>Course Title</th>
+                            <th>Category</th>
+                            <th>Instructor</th>
+                            <th>Batches</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+
+
+                        <tr>
+                            <td>1</td>
+                            <td>Web Development</td>
+                            <td>Web Development</td>
+                            <td>Mr. Usman</td>
+                            <td>3</td>
+                            <td><span class="badge-soft badge-green">Active</span></td>
+                            <td><button class="btn btn-sm btn-outline-primary">Edit</button></td>
+                        </tr>
+
+
+                        <tr>
+                            <td>2</td>
+                            <td>UI/UX Design</td>
+                            <td>Graphic Design</td>
+                            <td>Mr. Bilal</td>
+                            <td>2</td>
+                            <td>
+                                <span class="badge-soft badge-green">Active</span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary">Edit</button>
+                            </td>
+                        </tr>
+
+
+                        <tr>
+                            <td>3</td>
+                            <td>Python Programming</td>
+                            <td>AI</td>
+                            <td>Mr. Hamza</td>
+                            <td>2</td>
+                            <td><span class="badge-soft badge-green">Active</span></td>
+                            <td><button class="btn btn-sm btn-outline-primary">Edit</button></td>
+                        </tr>
+
+
+                        <tr>
+                            <td>4</td>
+                            <td>Artificial Intelligence</td>
+                            <td>AI</td>
+                            <td>Ms. Ayesha</td>
+                            <td>3</td>
+                            <td>
+                                <span class="badge-soft badge-green">Active</span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary">Edit</button>
+                            </td>
+                        </tr>
+
+
+                        <tr>
+                            <td>5</td>
+                            <td>Digital Marketing & SEO</td>
+                            <td>Digital Marketing</td>
+                            <td>Mr. Ahmed</td>
+                            <td>2</td>
+                            <td><span class="badge-soft badge-green">Active</span></td>
+                            <td><button class="btn btn-sm btn-outline-primary">Edit</button></td>
+                        </tr>
+
+
+                        <tr>
+                            <td>6</td>
+                            <td>Graphic Designing</td>
+                            <td>Graphic Design</td>
+                            <td>Mr. Bilal</td>
+                            <td>2</td>
+                            <td><span class="badge-soft badge-orange">Inactive</span></td>
+                            <td><button class="btn btn-sm btn-outline-primary">Edit</button></td>
+                        </tr>
+
+
+                        <tr>
+                            <td>7</td>
+                            <td>Freelancing</td>
+                            <td>Web Development</td>
+                            <td>Mr. Usman</td>
+                            <td>1</td>
+                            <td><span class="badge-soft badge-green">Active</span></td>
+                            <td><button class="btn btn-sm btn-outline-primary">Edit</button></td>
+                        </tr>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <script src="../js/app.js"></script>
+
+</body>
+
+</html>
