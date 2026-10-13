@@ -12,53 +12,178 @@
 <body>
     <div class="container">
         <div class="card-custom text-center mt-5 py-5">
-            <div class="success-circle">
-                ✓
-            </div>
-            <h1 class="title mt-4">Thank You!</h1>
-            <p class="muted">Your feedback has been submitted successfully.</p>
 
-            <div class="border rounded p-4 text-start mx-auto mt-4" style="max-width:820px">
+            <div class="success-circle">✓</div>
+
+            <h1 class="title mt-4">Thank You!</h1>
+
+            <p class="muted">
+                Your feedback has been submitted successfully.
+            </p>
+
+            <div id="loadingMessage" class="alert alert-info mt-4">
+                Loading submission details...
+            </div>
+
+            <div id="errorMessage" class="alert alert-danger mt-4" style="display:none;"></div>
+
+            <div id="submissionDetails" class="border rounded p-4 text-start mx-auto mt-4"
+                style="max-width:820px; display:none;">
+
                 <div class="row g-3">
+
                     <div class="col-md-3">
                         <small class="muted">Course</small>
                         <br>
-                        <b>Web Development</b>
+                        <b id="courseName">—</b>
                     </div>
 
                     <div class="col-md-3">
                         <small class="muted">Batch</small>
                         <br>
-                        <b>WD-12</b>
+                        <b id="batchName">—</b>
                     </div>
 
                     <div class="col-md-3">
                         <small class="muted">Instructor</small>
                         <br>
-                        <b>Mr. Usman</b>
+                        <b id="instructorName">Not available</b>
                     </div>
 
                     <div class="col-md-3">
-
                         <small class="muted">Submission ID</small>
                         <br>
-                        <b>12 May 2026 • 10:30 AM</b>
+                        <b id="submissionId">—</b>
                     </div>
+
                 </div>
+
                 <hr>
-                <small class="muted">Date</small>
+
+                <small class="muted">Submission Date</small>
                 <br>
-                <b>12 May 2025 • 10:30 AM</b>
+                <b id="submissionDate">—</b>
+
             </div>
 
             <div class="mt-4">
-                <a href="student-dashboard.html" class="btn btn-navy">Back to Dashboard</a>
-                <a href="course-information.html" class="btn btn-outline-secondary ms-2"> Submit Another Feedback</a>
+                <a href="student-dashboard.html" class="btn btn-navy">
+                    Back to Dashboard
+                </a>
+
+                <a href="course-information.html" class="btn btn-outline-secondary ms-2">
+                    Submit Another Feedback
+                </a>
             </div>
 
         </div>
     </div>
-    <script src="../js/app.js"></script>
+
+    <script>
+        const API_URL = "http://localhost:5000/api";
+
+        const token = localStorage.getItem("token");
+
+        const submissionId =
+            localStorage.getItem("lastSubmissionId");
+
+        const loadingMessage =
+            document.getElementById("loadingMessage");
+
+        const errorMessage =
+            document.getElementById("errorMessage");
+
+        const details =
+            document.getElementById("submissionDetails");
+
+        function showError(message) {
+            loadingMessage.style.display = "none";
+            errorMessage.style.display = "block";
+            errorMessage.textContent = message;
+        }
+
+        function formatDate(value) {
+            if (!value) return "Not available";
+
+            const date = new Date(value);
+
+            if (Number.isNaN(date.getTime())) {
+                return "Not available";
+            }
+
+            return date.toLocaleString();
+        }
+
+        async function loadSubmissionDetails() {
+            try {
+                if (!token) {
+                    throw new Error(
+                        "Your login session has expired. Please log in again."
+                    );
+                }
+
+                if (!submissionId) {
+                    throw new Error(
+                        "Submission ID was not found in browser storage."
+                    );
+                }
+
+                const response = await fetch(
+                    `${API_URL}/feedback-submissions/${encodeURIComponent(submissionId)}`,
+                    {
+                        cache: "no-store",
+                        headers: {
+                            "Authorization": `Bearer ${token}`,
+                            "Content-Type": "application/json"
+                        }
+                    }
+                );
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        result.message || "Could not load submission details."
+                    );
+                }
+
+                const submission = result.data || result;
+
+                document.getElementById("submissionId").textContent =
+                    submission.id ?? submission.submission_id ?? submissionId;
+
+                document.getElementById("courseName").textContent =
+                    submission.course_name ||
+                    submission.course ||
+                    "Not available";
+
+                document.getElementById("batchName").textContent =
+                    submission.batch_name ||
+                    submission.batch ||
+                    "Not available";
+
+                document.getElementById("instructorName").textContent =
+                    submission.instructor_name ||
+                    submission.instructor ||
+                    "Not available";
+
+                document.getElementById("submissionDate").textContent =
+                    formatDate(
+                        submission.submitted_at ||
+                        submission.created_at
+                    );
+
+                loadingMessage.style.display = "none";
+                details.style.display = "block";
+
+            } catch (error) {
+                console.error("Submission confirmation error:", error);
+                showError(error.message);
+            }
+        }
+
+        loadSubmissionDetails();
+    </script>
 
 </body>
 

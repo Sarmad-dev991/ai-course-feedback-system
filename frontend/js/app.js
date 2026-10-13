@@ -45,120 +45,194 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // =====================================================
-    // 3. LOGIN PAGE
-    // =====================================================
+// 3. LOGIN PAGE
+// =====================================================
 
-    const loginForm = document.getElementById("loginForm");
-    const togglePassword = document.getElementById("togglePassword");
-    const password = document.getElementById("password");
-    const loginError = document.getElementById("loginError");
-
-
-    // Password Show / Hide
-    if (togglePassword && password) {
-
-        togglePassword.addEventListener("click", function () {
-
-            if (password.type === "password") {
-
-                password.type = "text";
-
-                togglePassword.innerHTML =
-                    '<i class="bi bi-eye-slash"></i>';
-
-            } else {
-
-                password.type = "password";
-
-                togglePassword.innerHTML =
-                    '<i class="bi bi-eye"></i>';
-
-            }
-
-        });
-
-    }
+const loginForm = document.getElementById("loginForm");
+const togglePassword = document.getElementById("togglePassword");
+const password = document.getElementById("password");
+const loginError = document.getElementById("loginError");
 
 
-    // Login Form
-    if (loginForm) {
+// Password Show / Hide
+if (togglePassword && password) {
 
-        loginForm.addEventListener("submit", function (event) {
+    togglePassword.addEventListener("click", function () {
 
-            event.preventDefault();
+        if (password.type === "password") {
 
+            password.type = "text";
 
-            const emailInput = document.getElementById("email");
+            togglePassword.innerHTML =
+                '<i class="bi bi-eye-slash"></i>';
 
-            const passwordInput = document.getElementById("password");
+        } else {
 
-            const selectedRole =
-                document.querySelector('input[name="role"]:checked');
+            password.type = "password";
 
+            togglePassword.innerHTML =
+                '<i class="bi bi-eye"></i>';
 
-            const email =
-                emailInput ? emailInput.value.trim() : "";
+        }
 
-            const passwordValue =
-                passwordInput ? passwordInput.value.trim() : "";
+    });
 
-
-            // Validation
-            if (!email || !passwordValue || !selectedRole) {
-
-                if (loginError) {
-
-                    loginError.innerHTML =
-                        '<i class="bi bi-exclamation-circle me-1"></i>' +
-                        "Please enter all required information.";
-
-                    loginError.classList.add("show");
-
-                }
-
-                return;
-
-            }
+}
 
 
-            // Hide error
+// Login Form
+if (loginForm) {
+
+    loginForm.addEventListener("submit", async function (event) {
+
+        event.preventDefault();
+
+        const emailInput = document.getElementById("email");
+        const passwordInput = document.getElementById("password");
+
+        const selectedRole =
+            document.querySelector('input[name="role"]:checked');
+
+        const email =
+            emailInput ? emailInput.value.trim() : "";
+
+        const passwordValue =
+            passwordInput ? passwordInput.value : "";
+
+
+        // Validation
+        if (!email || !passwordValue || !selectedRole) {
+
             if (loginError) {
 
-                loginError.classList.remove("show");
+                loginError.innerHTML =
+                    "Please enter email, password and select a role.";
+
+                loginError.classList.add("show");
+
+            }
+
+            return;
+        }
+
+
+        // Hide previous error
+        if (loginError) {
+
+            loginError.innerHTML = "";
+            loginError.classList.remove("show");
+
+        }
+
+
+        // Convert frontend role to backend role format
+        let role = "";
+
+        if (selectedRole.value === "student") {
+            role = "Student";
+        }
+
+        else if (selectedRole.value === "instructor") {
+            role = "Instructor";
+        }
+
+        else if (selectedRole.value === "admin") {
+            role = "Admin";
+        }
+
+
+        try {
+
+            const response = await fetch(
+                "http://localhost:5000/api/auth/login",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        email: email,
+                        password: passwordValue,
+                        role: role
+                    })
+                }
+            );
+
+
+            const data = await response.json();
+
+
+            if (!response.ok || !data.success) {
+
+                throw new Error(
+                    data.message || "Login failed"
+                );
 
             }
 
 
-            // Selected Role
-            const role = selectedRole.value;
+            // Save authentication data
+            localStorage.setItem(
+                "token",
+                data.token
+            );
+
+            localStorage.setItem(
+                "user",
+                JSON.stringify(data.user)
+            );
 
 
-            // Frontend Prototype Navigation
-            if (role === "student") {
+            // Redirect according to actual backend role
+            if (data.user.role === "Student") {
 
                 window.location.href =
                     "student-dashboard.html";
 
             }
 
-            else if (role === "instructor") {
+            else if (data.user.role === "Instructor") {
 
                 window.location.href =
                     "instructor-dashboard.html";
 
             }
 
-            else if (role === "admin") {
+            else if (data.user.role === "Admin") {
 
                 window.location.href =
                     "admin-dashboard.html";
 
             }
 
-        });
+            else {
 
-    }
+                throw new Error("Unknown user role");
 
+            }
+
+
+        } catch (error) {
+
+            console.error("Login Error:", error);
+
+            if (loginError) {
+
+                loginError.innerHTML =
+                    error.message ||
+                    "Unable to connect to the backend.";
+
+                loginError.classList.add("show");
+
+            }
+
+        }
+
+    });
+
+}
 
     // =====================================================
     // 4. STUDENT COURSE SEARCH

@@ -20,10 +20,13 @@ const login = (req, res) => {
             u.email,
             u.password_hash,
             u.is_active,
-            r.name AS role
+            r.name AS role,
+            s.id AS student_id
         FROM users u
         JOIN roles r
             ON u.role_id = r.id
+        LEFT JOIN students s
+            ON s.user_id = u.id
         WHERE u.email = ?
         LIMIT 1
     `;
@@ -54,41 +57,62 @@ const login = (req, res) => {
             });
         }
 
-        const passwordMatch = await bcrypt.compare(
-            password,
-            user.password_hash
-        );
+        try {
+            const passwordMatch = await bcrypt.compare(
+                password,
+                user.password_hash
+            );
 
-        if (!passwordMatch) {
-            return res.status(401).json({
+            if (!passwordMatch) {
+                return res.status(401).json({
+                    success: false,
+                    message: "Invalid email or password"
+                });
+            }
+
+            // Student profile verification
+            if (user.role === "Student" && !user.student_id) {
+                return res.status(403).json({
+                    success: false,
+                    message: "Student profile not found"
+                });
+            }
+
+            // Generate JWT token
+            const token = jwt.sign(
+                {
+                    userId: user.id,
+                    email: user.email,
+                    role: user.role,
+                    studentId: user.student_id || null
+                },
+                process.env.JWT_SECRET || "development_secret",
+                {
+                    expiresIn: "1h"
+                }
+            );
+
+            return res.json({
+                success: true,
+                message: "Login successful",
+                token,
+                user: {
+                    id: user.id,
+                    name: user.name,
+                    email: user.email,
+                    role: user.role,
+                    student_id: user.student_id || null
+                }
+            });
+
+        } catch (error) {
+            console.error(error);
+
+            return res.status(500).json({
                 success: false,
-                message: "Invalid email or password"
+                message: "Login failed"
             });
         }
-
-        const token = jwt.sign(
-            {
-                userId: user.id,
-                email: user.email,
-                role: user.role
-            },
-            process.env.JWT_SECRET || "development_secret",
-            {
-                expiresIn: "1h"
-            }
-        );
-
-        res.json({
-            success: true,
-            message: "Login successful",
-            token,
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                role: user.role
-            }
-        });
     });
 };
 

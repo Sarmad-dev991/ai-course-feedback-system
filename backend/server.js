@@ -1,8 +1,10 @@
 require("dotenv").config();
 
 const express = require("express");
+const cors = require("cors");
 const db = require("./src/config/db");
 
+// Routes
 const authRoutes = require("./src/routes/auth.routes");
 const userRoutes = require("./src/routes/user.routes");
 const courseRoutes = require("./src/routes/course.routes");
@@ -11,7 +13,7 @@ const enrollmentRoutes = require("./src/routes/enrollment.routes");
 const analyticsRoutes = require("./src/routes/analytics.routes");
 const courseCategoryRoutes = require("./src/routes/courseCategory.routes");
 const feedbackFormRoutes = require("./src/routes/feedbackForm.routes");
-const questionRoutes = require("./src/routes/question.routes"); 
+const questionRoutes = require("./src/routes/question.routes");
 const feedbackResponseRoutes = require("./src/routes/feedbackResponse.routes");
 const reportRoutes = require("./src/routes/report.routes");
 const auditLogRoutes = require("./src/routes/auditLog.routes");
@@ -24,6 +26,7 @@ const ratingResponseRoutes = require("./src/routes/ratingResponse.routes");
 const textResponseRoutes = require("./src/routes/textResponse.routes");
 const aiAnalysisRoutes = require("./src/routes/aiAnalysis.routes");
 
+// Middleware
 const notFound = require("./src/middleware/notFound.middleware");
 const errorHandler = require("./src/middleware/error.middleware");
 
@@ -32,12 +35,17 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 
+// =========================
 // Global Middleware
+// =========================
 
+app.use(cors());
 app.use(express.json());
 
 
+// =========================
 // API Routes
+// =========================
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
@@ -60,33 +68,36 @@ app.use("/api/rating-responses", ratingResponseRoutes);
 app.use("/api/text-responses", textResponseRoutes);
 app.use("/api/ai-analyses", aiAnalysisRoutes);
 
+
+// =========================
 // Test API
+// =========================
 
 app.get("/api", (req, res) => {
-
     res.json({
         message: "AI Course Feedback System Backend is running"
     });
-
 });
 
 
+// =========================
 // 404 Middleware
+// =========================
 
 app.use(notFound);
 
 
+// =========================
 // Error Handling Middleware
+// =========================
 
 app.use(errorHandler);
 
 
+// =========================
 // Start Server
+// =========================
 
 app.listen(PORT, () => {
-
-    console.log(
-        `Server running on http://localhost:${PORT}`
-    );
-
+    console.log(`Server running on http://localhost:${PORT}`);
 });

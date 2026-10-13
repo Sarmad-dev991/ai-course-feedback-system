@@ -5,18 +5,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instructor Evaluation</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
 </head>
 
 <body>
-    <aside class="sidebar">
 
+    <aside class="sidebar">
         <div class="brand">
             <div class="logo">CS</div>
-
-            <div>
-                CS TECHNOLOGIES
+            <div>CS TECHNOLOGIES
                 <small>RAWALPINDI</small>
             </div>
         </div>
@@ -24,207 +24,417 @@
         <a href="student-dashboard.html" class="nav-link-custom">Dashboard</a>
         <a href="my-courses.html" class="nav-link-custom">My Courses</a>
         <a href="course-information.html" class="nav-link-custom active">Feedback</a>
+
         <div class="logout">
-            <a href="login.html" class="nav-link-custom">
-                Logout
-            </a>
+            <a href="login.html" class="nav-link-custom">Logout</a>
         </div>
     </aside>
 
     <main class="main">
+
         <header class="topbar">
             <div class="brand">
-
                 <div class="logo">CS</div>
-
-                <div>
-                    CS TECHNOLOGIES
+                <div>CS TECHNOLOGIES
                     <small>RAWALPINDI</small>
                 </div>
-
             </div>
-            <b>Ali Hassan</b>
+            <b id="studentName">Student</b>
         </header>
 
         <section class="content">
-            <div class="stepper">
 
+            <div class="stepper">
                 <div class="step">
                     <div class="circle">1</div>
                     Course Info
                 </div>
-
                 <div class="step active">
                     <div class="circle">2</div>
                     Instructor
                 </div>
-
                 <div class="step">
                     <div class="circle">3</div>
                     Course
                 </div>
-
                 <div class="step">
                     <div class="circle">4</div>
                     Facilities
                 </div>
-
                 <div class="step">
                     <div class="circle">5</div>
                     Comments
                 </div>
-
                 <div class="step">
                     <div class="circle">6</div>
                     Review
                 </div>
-
             </div>
 
             <div class="card-custom">
+
                 <div class="d-flex justify-content-between flex-wrap gap-3">
-
                     <div>
-
-                        <h4 class="title">
-                            A – Instructor Evaluation
-                        </h4>
-
+                        <h4 class="title">A – Instructor Evaluation</h4>
                         <p class="muted">
                             Please rate your instructor on the following parameters.
                         </p>
                     </div>
 
                     <div>
-                        <span class="text-success">● Excellent</span> &nbsp;
-                        <span class="text-primary">● Good</span> &nbsp;
-                        <span class="text-warning">● Average</span> &nbsp;
+                        <span class="text-success">● Excellent</span>&nbsp;
+                        <span class="text-primary">● Good</span>&nbsp;
+                        <span class="text-warning">● Average</span>&nbsp;
                         <span class="text-danger">● Below Average</span>
                     </div>
-
                 </div>
 
-                <div class="table-responsive mt-3">
-                    <table class="table-custom">
-
-                        <tr>
-                            <th>#</th>
-                            <th>Question</th>
-                            <th>Excellent</th>
-                            <th>Good</th>
-                            <th>Average</th>
-                            <th>Below Average</th>
-                        </tr>
-
-                        <tr>
-                            <td>1</td>
-                            <td>Instructor was regular and punctual.</td>
-                            <td><input type="radio" name="q1"></td>
-                            <td><input type="radio" name="q1"></td>
-                            <td><input type="radio" name="q1"></td>
-                            <td><input type="radio" name="q1"></td>
-                        </tr>
-
-                        <tr>
-                            <td>2</td>
-                            <td>Command over the subject was sound.</td>
-                            <td><input type="radio" name="q2"></td>
-                            <td><input type="radio" name="q2"></td>
-                            <td><input type="radio" name="q2"></td>
-                            <td><input type="radio" name="q2"></td>
-                        </tr>
-
-                        <tr>
-                            <td>3</td>
-                            <td>Lecture pace was right for understanding.</td>
-                            <td><input type="radio" name="q3"></td>
-                            <td><input type="radio" name="q3"></td>
-                            <td><input type="radio" name="q3"></td>
-                            <td><input type="radio" name="q3"></td>
-                        </tr>
-
-                        <tr>
-                            <td>4</td>
-                            <td>Instructor was fair and unbiased.</td>
-                            <td><input type="radio" name="q4"></td>
-                            <td><input type="radio" name="q4"></td>
-                            <td><input type="radio" name="q4"></td>
-                            <td><input type="radio" name="q4"></td>
-                        </tr>
-
-                        <tr>
-                            <td>5</td>
-                            <td>Relationship with students was congenial.</td>
-                            <td><input type="radio" name="q5"></td>
-                            <td><input type="radio" name="q5"></td>
-                            <td><input type="radio" name="q5"></td>
-                            <td><input type="radio" name="q5"></td>
-                        </tr>
-
-                        <tr>
-                            <td>6</td>
-                            <td>Class discipline during lecture was good.</td>
-                            <td><input type="radio" name="q6"></td>
-                            <td><input type="radio" name="q6"></td>
-                            <td><input type="radio" name="q6"></td>
-                            <td><input type="radio" name="q6"></td>
-                        </tr>
-
-                        <tr>
-                            <td>7</td>
-                            <td>Lectures were well organized.</td>
-                            <td><input type="radio" name="q7"></td>
-                            <td><input type="radio" name="q7"></td>
-                            <td><input type="radio" name="q7"></td>
-                            <td><input type="radio" name="q7"></td>
-                        </tr>
-
-                        <tr>
-                            <td>8</td>
-                            <td>Lectures and discussion were encouraged.</td>
-                            <td><input type="radio" name="q8"></td>
-                            <td><input type="radio" name="q8"></td>
-                            <td><input type="radio" name="q8"></td>
-                            <td><input type="radio" name="q8"></td>
-                        </tr>
-
-                        <tr>
-                            <td>9</td>
-                            <td>Satisfactory answers were given to class questions.</td>
-                            <td><input type="radio" name="q9"></td>
-                            <td><input type="radio" name="q9"></td>
-                            <td><input type="radio" name="q9"></td>
-                            <td><input type="radio" name="q9"></td>
-                        </tr>
-
-                        <tr>
-                            <td>10</td>
-                            <td>Instructor was helpful outside the class.</td>
-                            <td><input type="radio" name="q10"></td>
-                            <td><input type="radio" name="q10"></td>
-                            <td><input type="radio" name="q10"></td>
-                            <td><input type="radio" name="q10"></td>
-                        </tr>
-                    </table>
-
+                <div id="message" class="alert alert-info mt-3">
+                    Loading instructor questions...
                 </div>
 
-                <div class="d-flex justify-content-between mt-3">
-                    <a href="course-information.html" class="btn btn-outline-primary">← Previous</a>
-                    <div>
+                <form id="instructorForm" style="display:none;">
 
-                        <button id="saveInstructor" class="btn btn-outline-primary me-2">Save & Continue</button>
-                        <a href="course-evaluation.html" class="btn btn-navy">Next: Course Evaluation →</a>
+                    <div class="table-responsive mt-3">
+                        <table class="table-custom">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Question</th>
+                                    <th>Excellent</th>
+                                    <th>Good</th>
+                                    <th>Average</th>
+                                    <th>Below Average</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="questionsBody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-3 flex-wrap gap-2">
+
+                        <a href="course-information.html"
+                           class="btn btn-outline-primary">
+                            ← Previous
+                        </a>
+
+                        <div>
+                            <button type="button"
+                                    id="saveInstructor"
+                                    class="btn btn-outline-primary me-2">
+                                Save Ratings
+                            </button>
+
+                            <button type="button"
+                                    id="continueButton"
+                                    class="btn btn-navy">
+                                Next: Course Evaluation →
+                            </button>
+                        </div>
 
                     </div>
-                </div>
+
+                </form>
+
             </div>
-
         </section>
-
     </main>
 
-    <script src="../js/app.js"></script>
+    <script>
+        const API_URL = "http://localhost:5000/api";
+        const token = localStorage.getItem("token");
+
+        const user = JSON.parse(
+            localStorage.getItem("user") || "{}"
+        );
+
+        const message = document.getElementById("message");
+        const form = document.getElementById("instructorForm");
+        const questionsBody = document.getElementById("questionsBody");
+
+        document.getElementById("studentName").textContent =
+            user.name || user.full_name || "Student";
+
+        // Redirect users who are not logged in.
+        if (!token) {
+            window.location.href = "login.html";
+        }
+
+        // Read a field safely when API naming differs.
+        function getField(object, fields) {
+            for (const field of fields) {
+                if (object[field] !== undefined &&
+                    object[field] !== null &&
+                    object[field] !== "") {
+                    return object[field];
+                }
+            }
+            return null;
+        }
+
+        function getQuestionText(question) {
+            return getField(question, [
+                "question_text",
+                "question",
+                "text",
+                "title"
+            ]) || "Question";
+        }
+
+        function getOptionLabel(option) {
+            return String(getField(option, [
+                "option_text",
+                "option_label",
+                "option_name",
+                "label",
+                "text",
+                "name"
+            ]) || "");
+        }
+
+        function getOptionValue(option, label) {
+            const value = getField(option, [
+                "option_value",
+                "rating_value",
+                "score",
+                "value"
+            ]);
+
+            if (value !== null) return value;
+
+            const scores = {
+                "excellent": 5,
+                "good": 4,
+                "average": 3,
+                "below average": 2
+            };
+
+            return scores[label.toLowerCase()] ?? "";
+        }
+
+        function getSection(question) {
+            return String(getField(question, [
+                "section",
+                "category",
+                "question_category",
+                "section_name"
+            ]) || "").toLowerCase();
+        }
+
+        // Restore previously saved ratings.
+        const savedRatings = JSON.parse(
+            localStorage.getItem("instructorRatings") || "{}"
+        );
+
+        let instructorQuestions = [];
+
+        function showError(error) {
+            console.error(error);
+            message.className = "alert alert-danger mt-3";
+            message.textContent = error.message ||
+                "Unable to load instructor questions.";
+        }
+
+        async function loadInstructorQuestions() {
+            try {
+                const headers = {
+                    "Authorization": `Bearer ${token}`
+                };
+
+                const [questionResponse, optionResponse] =
+                    await Promise.all([
+                        fetch(`${API_URL}/questions`, { headers }),
+                        fetch(`${API_URL}/feedback-options`, { headers })
+                    ]);
+
+                const questionData = await questionResponse.json();
+                const optionData = await optionResponse.json();
+
+                if (!questionResponse.ok || !optionResponse.ok) {
+                    throw new Error(
+                        questionData.message ||
+                        optionData.message ||
+                        "Failed to retrieve feedback questions."
+                    );
+                }
+
+                const allQuestions = questionData.data || [];
+                const allOptions = optionData.data || [];
+
+                // Prefer the Instructor section returned by the API.
+                const sectionQuestions = allQuestions.filter(question => {
+                    const section = getSection(question);
+                    return section.includes("instructor");
+                });
+
+                // Fallback: first 10 questions if the API has no section field.
+                instructorQuestions = (
+                    sectionQuestions.length >= 10
+                        ? sectionQuestions
+                        : allQuestions.slice(0, 10)
+                ).slice(0, 10);
+
+                if (instructorQuestions.length !== 10) {
+                    throw new Error(
+                        `Expected 10 instructor questions, found ${instructorQuestions.length}.`
+                    );
+                }
+
+                instructorQuestions.sort(
+                    (a, b) => Number(a.id) - Number(b.id)
+                );
+
+                questionsBody.innerHTML = "";
+
+                instructorQuestions.forEach((question, index) => {
+                    const questionOptions = allOptions.filter(option =>
+                        String(option.question_id) === String(question.id)
+                    );
+
+                    const expectedLabels = [
+                        "Excellent",
+                        "Good",
+                        "Average",
+                        "Below Average"
+                    ];
+
+                    const normalizedOptions = expectedLabels.map(label =>
+                        questionOptions.find(option =>
+                            getOptionLabel(option).toLowerCase() ===
+                            label.toLowerCase()
+                        )
+                    );
+
+                    if (normalizedOptions.some(option => !option)) {
+                        throw new Error(
+                            `Question ${question.id} does not have all four rating options in the API.`
+                        );
+                    }
+
+                    const row = document.createElement("tr");
+
+                    const numberCell = document.createElement("td");
+                    numberCell.textContent = index + 1;
+
+                    const textCell = document.createElement("td");
+                    textCell.textContent = getQuestionText(question);
+
+                    row.appendChild(numberCell);
+                    row.appendChild(textCell);
+
+                    normalizedOptions.forEach((option, optionIndex) => {
+                        const cell = document.createElement("td");
+                        cell.className = "text-center";
+
+                        const radio = document.createElement("input");
+                        radio.type = "radio";
+                        radio.name = `question_${question.id}`;
+                        radio.value = String(option.id);
+                        radio.required = optionIndex === 0;
+
+                        radio.dataset.questionId = question.id;
+                        radio.dataset.optionId = option.id;
+                        radio.dataset.label = expectedLabels[optionIndex];
+                        radio.dataset.score = getOptionValue(
+                            option,
+                            expectedLabels[optionIndex]
+                        );
+
+                        radio.setAttribute(
+                            "aria-label",
+                            `${getQuestionText(question)} - ${expectedLabels[optionIndex]}`
+                        );
+
+                        // Restore any previously saved choice.
+                        const saved = savedRatings[question.id];
+
+                        if (saved &&
+                            String(saved.optionId) === String(option.id)) {
+                            radio.checked = true;
+                        }
+
+                        cell.appendChild(radio);
+                        row.appendChild(cell);
+                    });
+
+                    questionsBody.appendChild(row);
+                });
+
+                message.style.display = "none";
+                form.style.display = "block";
+
+            } catch (error) {
+                showError(error);
+            }
+        }
+
+        // Collect all selected ratings and save them locally.
+        function collectRatings() {
+            const ratings = {};
+
+            for (const question of instructorQuestions) {
+                const selected = form.querySelector(
+                    `input[name="question_${question.id}"]:checked`
+                );
+
+                if (!selected) {
+                    return {
+                        valid: false,
+                        message: `Please rate question: ${getQuestionText(question)}`
+                    };
+                }
+
+                ratings[question.id] = {
+                    questionId: Number(question.id),
+                    optionId: Number(selected.dataset.optionId),
+                    label: selected.dataset.label,
+                    score: Number(selected.dataset.score)
+                };
+            }
+
+            return { valid: true, ratings };
+        }
+
+        function saveRatings() {
+            const result = collectRatings();
+
+            if (!result.valid) {
+                message.style.display = "block";
+                message.className = "alert alert-warning mt-3";
+                message.textContent = result.message;
+                return false;
+            }
+
+            localStorage.setItem(
+                "instructorRatings",
+                JSON.stringify(result.ratings)
+            );
+
+            message.style.display = "block";
+            message.className = "alert alert-success mt-3";
+            message.textContent =
+                "Instructor ratings saved in this browser.";
+
+            return true;
+        }
+
+        document.getElementById("saveInstructor").addEventListener(
+            "click",
+            saveRatings
+        );
+
+        document.getElementById("continueButton").addEventListener(
+            "click",
+            function () {
+                if (saveRatings()) {
+                    window.location.href = "course-evaluation.html";
+                }
+            }
+        );
+
+        loadInstructorQuestions();
+    </script>
 
 </body>
 </html>

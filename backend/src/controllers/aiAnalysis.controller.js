@@ -1,4 +1,5 @@
 const db = require("../config/db");
+const { analyzeFeedbackText } = require("../services/aiAnalysis.service");
 
 // GET ALL AI ANALYSES
 const getAIAnalyses = (req, res) => {
@@ -255,11 +256,108 @@ const deleteAIAnalysis = (req, res) => {
     );
 };
 
+// ANALYZE FEEDBACK SUBMISSION
+const analyzeSubmission = async (req, res) => {
+    const submissionId = Number(req.params.submissionId);
+
+    if (!Number.isInteger(submissionId) || submissionId <= 0) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid submission ID"
+        });
+    }
+
+    const sql = `
+        SELECT
+            tr.response_type,
+            tr.response_text
+        FROM text_responses tr
+        WHERE tr.submission_id = ?
+        AND tr.response_text IS NOT NULL
+        AND TRIM(tr.response_text) <> ''
+        ORDER BY tr.id ASC
+    `;
+
+    db.query(sql, [submissionId], async (err, results) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({
+                success: false,
+                message: "Failed to fetch feedback text"
+            });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No text feedback found for this submission"
+            });
+        }
+
+        const feedbackText = results
+            .map(item => `${item.response_type}: ${item.response_text}`)
+            .join("\n");
+
+        try {
+            const analysis = await analyzeFeedbackText(feedbackText);
+
+            const resultJson = JSON.stringify(analysis);
+
+            const insertSql = `
+                INSERT INTO ai_analyses
+                (
+                    submission_id,
+                    analysis_type,
+                    result
+                )
+                VALUES (?, ?, ?)
+            `;
+
+            db.query(
+                insertSql,
+                [
+                    submissionId,
+                    "feedback_analysis",
+                    resultJson
+                ],
+                (insertErr, insertResult) => {
+                    if (insertErr) {
+                        console.error(insertErr);
+                        return res.status(500).json({
+                            success: false,
+                            message: "AI analysis generated but could not be saved"
+                        });
+                    }
+
+                    res.status(201).json({
+                        success: true,
+                        message: "AI analysis generated successfully",
+                        data: {
+                            id: insertResult.insertId,
+                            submission_id: submissionId,
+                            analysis_type: "feedback_analysis",
+                            analysis
+                        }
+                    });
+                }
+            );
+
+        } catch (aiError) {
+            console.error("AI Error:", aiError);
+
+            res.status(500).json({
+                success: false,
+                message: "Failed to generate AI analysis"
+            });
+        }
+    });
+};
 
 module.exports = {
     getAIAnalyses,
     getAIAnalysisById,
     createAIAnalysis,
     updateAIAnalysis,
-    deleteAIAnalysis
+    deleteAIAnalysis,
+    analyzeSubmission
 };

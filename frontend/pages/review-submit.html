@@ -1,135 +1,490 @@
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Review Feedback</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Review Feedback - CS Technologies</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
+
+    <style>
+        .review-item {
+            border: 1px solid #e1e7ef;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+
+        .review-value {
+            color: #1769e0;
+            font-weight: 600;
+        }
+
+        .review-muted {
+            color: #687386;
+            font-size: 14px;
+        }
+
+        #submitMessage {
+            white-space: pre-line;
+        }
+    </style>
 </head>
 
 <body>
-    <main class="main">
-        <header class="topbar">
+<main class="main">
+    <header class="topbar">
+        <div class="brand">
+            <div class="logo">CS</div>
+            <div>CS TECHNOLOGIES<small>RAWALPINDI</small></div>
+        </div>
+        <b id="studentName">Student</b>
+    </header>
 
-            <div class="brand">
-                <div class="logo">CS</div>
-                <div>
-                    CS TECHNOLOGIES
-                    <small>RAWALPINDI</small>
-                </div>
+    <section class="content">
+        <div class="stepper">
+            <div class="step"><div class="circle">1</div>Course Info</div>
+            <div class="step"><div class="circle">2</div>Instructor</div>
+            <div class="step"><div class="circle">3</div>Course</div>
+            <div class="step"><div class="circle">4</div>Facilities</div>
+            <div class="step"><div class="circle">5</div>Comments</div>
+            <div class="step active"><div class="circle">6</div>Review</div>
+        </div>
 
-            </div>
-            <b>Ali Hassan</b>
-        </header>
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card-custom">
+                    <h4 class="title">Review Your Feedback</h4>
+                    <p class="review-muted">
+                        Review your answers before submitting the form.
+                    </p>
 
-        <section class="content">
-            <div class="stepper">
-
-                <div class="step">
-                    <div class="circle">1</div>
-                    Course Info
-                </div>
-                <div class="step">
-                    <div class="circle">2</div>
-                    Instructor
-                </div>
-                <div class="step">
-                    <div class="circle">3</div>
-                    Course
-                </div>
-                <div class="step">
-                    <div class="circle">4</div>
-                    Facilities
-                </div>
-                <div class="step">
-                    <div class="circle">5</div>
-                    Comments
-                </div>
-                <div class="step active">
-                    <div class="circle">6</div>
-                    Review
-                </div>
-            </div>
-
-
-            <div class="row g-4">
-                <div class="col-lg-8">
-
-                    <div class="card-custom">
-                        <h4 class="title">Review Your Feedback</h4>
-                        <p class="muted">Please review your feedback before final submission.</p>
-
-                        <div class="border rounded p-3 mt-3">
-                            Course Information
-
-                            <a href="course-information.html" class="float-end">Edit</a>
+                    <div class="review-item">
+                        <strong>Course Information</strong>
+                        <div id="courseDetails" class="mt-2 review-muted">
+                            Loading course information...
                         </div>
-
-                        <div class="border rounded p-3 mt-2">
-                            A – Instructor Evaluation
-                            <span class="badge-soft badge-green float-end">
-                                10 Answered
-                            </span>
-
-                        </div>
-
-                        <div class="border rounded p-3 mt-2">
-                            B – Course Evaluation
-                            <span class="badge-soft badge-green float-end">
-                                5 Answered
-                            </span>
-                        </div>
-
-                        <div class="border rounded p-3 mt-2">
-                            C – Overall Facilities
-                            <span class="badge-soft badge-green float-end">
-                                3 Answered
-                            </span>
-                        </div>
-
-                        <div class="border rounded p-3 mt-2">
-                            D – Complaints
-                            <span class="badge-soft badge-green float-end">
-                                Added
-                            </span>
-                        </div>
-
-                        <div class="border rounded p-3 mt-2">
-                            E – Suggestions
-                            <span class="badge-soft badge-green float-end">
-                                Added
-                            </span>
-                        </div>
-
-                        <div class="form-check mt-4">
-                            <input class="form-check-input" type="checkbox" id="confirm">
-                            <label class="form-check-label" for="confirm">I confirm that the above information is
-                                correct.</label>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="col-lg-4">
-                    <div class="card-custom">
-
-                        <h5 class="title">Ready to submit?</h5>
-                        <p class="muted">Once submitted, the response becomes read-only.</p>
-
-                        <button class="btn btn-success w-100" id="submitFeedback"
-                            data-go="submission-confirmation.html">Submit Feedback ✓</button>
+                        <a href="course-information.html">Edit</a>
                     </div>
 
+                    <div class="review-item">
+                        <strong>A — Instructor Evaluation</strong>
+                        <span id="instructorCount"
+                              class="badge-soft badge-green float-end">0/10 Answered</span>
+                        <div id="instructorAnswers" class="mt-3"></div>
+                        <a href="instructor-evaluation.html">Edit</a>
+                    </div>
+
+                    <div class="review-item">
+                        <strong>B — Course Evaluation</strong>
+                        <span id="courseCount"
+                              class="badge-soft badge-green float-end">0/5 Answered</span>
+                        <div id="courseAnswers" class="mt-3"></div>
+                        <a href="course-evaluation.html">Edit</a>
+                    </div>
+
+                    <div class="review-item">
+                        <strong>C — Overall Facilities</strong>
+                        <span id="facilitiesCount"
+                              class="badge-soft badge-green float-end">0/3 Answered</span>
+                        <div id="facilitiesAnswers" class="mt-3"></div>
+                        <a href="facilities-comments.html">Edit</a>
+                    </div>
+
+                    <div class="review-item">
+                        <strong>D — Complaint / Weakness</strong>
+                        <div id="complaintText" class="mt-2 review-muted">
+                            No complaint provided.
+                        </div>
+                    </div>
+
+                    <div class="review-item">
+                        <strong>E — Suggestions for Improvement</strong>
+                        <div id="suggestionText" class="mt-2 review-muted">
+                            No suggestion provided.
+                        </div>
+                    </div>
+
+                    <div class="form-check mt-4">
+                        <input class="form-check-input" type="checkbox" id="confirm">
+                        <label class="form-check-label" for="confirm">
+                            I confirm that my feedback is correct and ready for final submission.
+                        </label>
+                    </div>
+
+                    <div id="submitMessage"
+                         class="alert d-none mt-3"
+                         role="alert"></div>
                 </div>
             </div>
 
-        </section>
-    </main>
+            <div class="col-lg-4">
+                <div class="card-custom">
+                    <h5 class="title">Ready to submit?</h5>
+                    <p class="review-muted">
+                        After successful submission, your feedback should be read-only.
+                    </p>
 
-    <script src="../js/app.js"></script>
+                    <button class="btn btn-success w-100"
+                            id="submitFeedback"
+                            type="button">
+                        Submit Feedback ✓
+                    </button>
 
+                    <a href="facilities-comments.html"
+                       class="btn btn-outline-secondary w-100 mt-2">
+                        Go Back
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script src="../js/app.js"></script>
+
+<script>
+(() => {
+    const API = "http://localhost:5000/api";
+    const token = localStorage.getItem("token");
+
+    let user = null;
+
+    try {
+        user = JSON.parse(localStorage.getItem("user") || "null");
+    } catch {
+        user = null;
+    }
+
+    const getStoredJSON = (key) => {
+        try {
+            return JSON.parse(localStorage.getItem(key) || "{}");
+        } catch {
+            return {};
+        }
+    };
+
+    const instructorRatings = getStoredJSON("instructorRatings");
+    const courseRatings = getStoredJSON("courseRatings");
+    const facilitiesRatings = getStoredJSON("facilitiesRatings");
+    const comments = getStoredJSON("feedbackComments");
+
+    const allRatings = {
+        ...instructorRatings,
+        ...courseRatings,
+        ...facilitiesRatings
+    };
+
+    const messageBox = document.getElementById("submitMessage");
+    const submitButton = document.getElementById("submitFeedback");
+
+    document.getElementById("studentName").textContent =
+        user?.name || "Student";
+
+    function showMessage(message, type = "danger") {
+        messageBox.className = `alert alert-${type} mt-3`;
+        messageBox.textContent = message;
+    }
+
+    function renderRatings(storage, containerId, countId, expectedCount) {
+        const container = document.getElementById(containerId);
+        const count = document.getElementById(countId);
+        const entries = Object.values(storage || {});
+
+        count.textContent = `${entries.length}/${expectedCount} Answered`;
+        container.replaceChildren();
+
+        if (entries.length === 0) {
+            container.textContent = "No ratings saved yet.";
+            container.className = "mt-3 review-muted";
+            return;
+        }
+
+        container.className = "mt-3";
+
+        entries.forEach(answer => {
+            const line = document.createElement("div");
+            line.className = "d-flex justify-content-between gap-3 py-1";
+
+            const question = document.createElement("span");
+            question.textContent = `Question ${answer.questionId}`;
+
+            const value = document.createElement("span");
+            value.className = "review-value";
+            value.textContent = answer.label || `Option ${answer.optionId}`;
+
+            line.append(question, value);
+            container.appendChild(line);
+        });
+    }
+
+    renderRatings(
+        instructorRatings, "instructorAnswers", "instructorCount", 10
+    );
+
+    renderRatings(
+        courseRatings, "courseAnswers", "courseCount", 5
+    );
+
+    renderRatings(
+        facilitiesRatings, "facilitiesAnswers", "facilitiesCount", 3
+    );
+
+    document.getElementById("complaintText").textContent =
+        typeof comments.complaint === "string" && comments.complaint.trim()
+            ? comments.complaint.trim()
+            : "No complaint provided.";
+
+    document.getElementById("suggestionText").textContent =
+        typeof comments.suggestion === "string" && comments.suggestion.trim()
+            ? comments.suggestion.trim()
+            : "No suggestion provided.";
+
+    async function apiRequest(path, options = {}) {
+        const response = await fetch(`${API}${path}`, {
+            ...options,
+            headers: {
+                ...(options.headers || {}),
+                "Content-Type": "application/json",
+                ...(token ? { Authorization: `Bearer ${token}` } : {})
+            }
+        });
+
+        const result = await response.json().catch(() => ({}));
+
+        if (!response.ok || result.success === false) {
+            throw new Error(
+                result.message || `API request failed (${response.status})`
+            );
+        }
+
+        return result;
+    }
+
+    async function loadCourseInfo() {
+        if (!token) {
+            document.getElementById("courseDetails").textContent =
+                "Please log in to review your feedback.";
+            submitButton.disabled = true;
+            return;
+        }
+
+        try {
+            const result = await apiRequest("/feedback-forms");
+            const forms = Array.isArray(result.data) ? result.data : [];
+
+            const selectedCourseId =
+                localStorage.getItem("selectedCourseId");
+
+            const selectedFormId =
+                localStorage.getItem("selectedFormId");
+
+            const form = forms.find(item =>
+                selectedFormId &&
+                String(item.id) === String(selectedFormId)
+            ) || forms.find(item =>
+                selectedCourseId &&
+                String(item.course_id) === String(selectedCourseId)
+            ) || forms[0];
+
+            if (!form) {
+                document.getElementById("courseDetails").textContent =
+                    "No feedback form was found.";
+                submitButton.disabled = true;
+                return;
+            }
+
+            localStorage.setItem("selectedFormId", String(form.id));
+
+            document.getElementById("courseDetails").textContent =
+                `${form.course || "Course"} | ` +
+                `${form.batch || "Batch"} | ` +
+                `${form.title || "Feedback Form"}`;
+
+        } catch (error) {
+            document.getElementById("courseDetails").textContent =
+                `Could not load course information: ${error.message}`;
+        }
+    }
+
+    function validateAnswers() {
+        for (let questionId = 1; questionId <= 18; questionId++) {
+            const answer = allRatings[questionId];
+
+            if (
+                !answer ||
+                Number(answer.questionId) !== questionId ||
+                !Number.isInteger(Number(answer.optionId)) ||
+                Number(answer.optionId) <= 0
+            ) {
+                return `Question ${questionId} is unanswered or has invalid saved data. Please revisit that section.`;
+            }
+        }
+
+        return "";
+    }
+
+    async function verifyRatingOptions() {
+        const result = await apiRequest("/feedback-options");
+        const options = Array.isArray(result.data) ? result.data : [];
+
+        if (options.length === 0) {
+            throw new Error("No rating options were returned by the backend.");
+        }
+
+        for (let questionId = 1; questionId <= 18; questionId++) {
+            const answer = allRatings[questionId];
+
+            const matchingOption = options.find(option =>
+                Number(option.id) === Number(answer.optionId) &&
+                Number(option.question_id) === questionId
+            );
+
+            if (!matchingOption) {
+                throw new Error(
+                    `The selected option for question ${questionId} does not match the database. Please revisit the rating sections and select your answers again.`
+                );
+            }
+        }
+    }
+
+    submitButton.addEventListener("click", async () => {
+        if (submitButton.disabled) return;
+
+        if (!token || !user || !user.id) {
+            showMessage("Your session is missing. Please log in again.");
+            return;
+        }
+
+        if (!document.getElementById("confirm").checked) {
+            showMessage("Please tick the confirmation checkbox before submitting.");
+            return;
+        }
+
+        const validationError = validateAnswers();
+
+        if (validationError) {
+            showMessage(validationError);
+            return;
+        }
+
+        const selectedFormId = localStorage.getItem("selectedFormId");
+
+        if (!selectedFormId) {
+            showMessage(
+                "Feedback form not selected. Please revisit Course Information."
+            );
+            return;
+        }
+
+        submitButton.disabled = true;
+        submitButton.textContent = "Checking answers...";
+        messageBox.classList.add("d-none");
+
+        try {
+            // Verify all options before submitting anything.
+            await verifyRatingOptions();
+
+            // Find the student record linked to the logged-in user.
+            submitButton.textContent = "Preparing submission...";
+
+            const studentResult = await apiRequest("/students");
+            const students = Array.isArray(studentResult.data)
+                ? studentResult.data
+                : [];
+
+            const student = students.find(item =>
+                String(item.user_id) === String(user.id)
+            );
+
+            if (!student) {
+                throw new Error(
+                    "Your login could not be matched to a student record. Please contact the administrator."
+                );
+            }
+
+            // Prepare all 18 rating answers.
+            const ratings = [];
+
+            for (let questionId = 1; questionId <= 18; questionId++) {
+                const answer = allRatings[questionId];
+
+                ratings.push({
+                    question_id: questionId,
+                    option_id: Number(answer.optionId)
+                });
+            }
+
+            // Send submission, ratings and comments in ONE request.
+            submitButton.textContent = "Saving all feedback...";
+
+            const result = await apiRequest(
+                "/feedback-submissions/complete",
+                {
+                    method: "POST",
+                    body: JSON.stringify({
+                        form_id: Number(selectedFormId),
+                        student_id: Number(student.id),
+                        ratings,
+                        complaint:
+                            typeof comments.complaint === "string"
+                                ? comments.complaint.trim()
+                                : "",
+                        suggestion:
+                            typeof comments.suggestion === "string"
+                                ? comments.suggestion.trim()
+                                : ""
+                    })
+                }
+            );
+
+            const submission = result.data || result;
+            const submissionId =
+                submission.id || submission.submissionId;
+
+            if (!submissionId) {
+                throw new Error(
+                    "The backend response did not include a submission ID. Check the database before trying again."
+                );
+            }
+
+            // Only clear answers after the backend confirms success.
+            localStorage.setItem("lastSubmissionId", String(submissionId));
+            localStorage.setItem("feedbackSubmitted", "true");
+
+            localStorage.removeItem("instructorRatings");
+            localStorage.removeItem("courseRatings");
+            localStorage.removeItem("facilitiesRatings");
+            localStorage.removeItem("feedbackComments");
+
+            showMessage(
+                `Feedback saved successfully!\n` +
+                `Submission ID: ${submissionId}\n` +
+                `Ratings submitted: ${ratings.length}/18`,
+                "success"
+            );
+
+            window.location.href = "submission-confirmation.html";
+
+        } catch (error) {
+            showMessage(
+                `Submission failed: ${error.message}\n\n` +
+                `Your feedback has not been confirmed as saved. ` +
+                `If the connection failed unexpectedly, check the database ` +
+                `before submitting again.`,
+                "danger"
+            );
+
+            submitButton.disabled = false;
+            submitButton.textContent = "Try Again";
+        }
+    });
+
+    loadCourseInfo();
+})();
+</script>
 </body>
-
 </html>

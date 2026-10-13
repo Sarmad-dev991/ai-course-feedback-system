@@ -5,15 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Course Evaluation</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
 </head>
 
 <body>
+
     <aside class="sidebar">
         <div class="brand">
             <div class="logo">CS</div>
-
             <div>
                 CS TECHNOLOGIES
                 <small>RAWALPINDI</small>
@@ -27,139 +28,423 @@
         <div class="logout">
             <a href="login.html" class="nav-link-custom">Logout</a>
         </div>
-
     </aside>
+
     <main class="main">
 
         <header class="topbar">
             <div class="brand">
                 <div class="logo">CS</div>
-
                 <div>
                     CS TECHNOLOGIES
                     <small>RAWALPINDI</small>
                 </div>
             </div>
-
-            <b>Ali Hassan</b>
-
+            <b id="studentName">Student</b>
         </header>
-        <section class="content">
-            <div class="stepper">
 
+        <section class="content">
+
+            <div class="stepper">
                 <div class="step">
                     <div class="circle">1</div>
                     Course Info
                 </div>
-
                 <div class="step">
                     <div class="circle">2</div>
                     Instructor
                 </div>
-
                 <div class="step active">
                     <div class="circle">3</div>
                     Course
                 </div>
-
                 <div class="step">
                     <div class="circle">4</div>
                     Facilities
                 </div>
-
                 <div class="step">
                     <div class="circle">5</div>
                     Comments
                 </div>
-
                 <div class="step">
                     <div class="circle">6</div>
                     Review
                 </div>
-
             </div>
+
             <div class="card-custom">
 
-                <h4 class="title">
-                    B – Course Evaluation
-                </h4>
-
+                <h4 class="title">B – Course Evaluation</h4>
                 <p class="muted">
                     Please rate the course on the following parameters.
                 </p>
 
-                <div class="table-responsive">
-
-                    <table class="table-custom">
-
-                        <tr>
-
-                            <th>#</th>
-                            <th>Question</th>
-                            <th>Excellent</th>
-                            <th>Good</th>
-                            <th>Average</th>
-                            <th>Below Average</th>
-                        </tr>
-
-                        <tr>
-                            <td>1</td>
-                            <td>Lab availability.</td>
-                            <td><input type="radio" name="q1"></td>
-                            <td><input type="radio" name="q1"></td>
-                            <td><input type="radio" name="q1"></td>
-                            <td><input type="radio" name="q1"></td>
-                        </tr>
-
-                        <tr>
-                            <td>2</td>
-                            <td>Course coverage was in time.</td>
-                            <td><input type="radio" name="q2"></td>
-                            <td><input type="radio" name="q2"></td>
-                            <td><input type="radio" name="q2"></td>
-                            <td><input type="radio" name="q2"></td>
-                        </tr>
-
-                        <tr>
-                            <td>3</td>
-                            <td>Course outline was provided and followed.</td>
-                            <td><input type="radio" name="q3"></td>
-                            <td><input type="radio" name="q3"></td>
-                            <td><input type="radio" name="q3"></td>
-                            <td><input type="radio" name="q3"></td>
-                        </tr>
-
-                        <tr>
-                            <td>4</td>
-                            <td>Hands-on experience was given.</td>
-                            <td><input type="radio" name="q4"></td>
-                            <td><input type="radio" name="q4"></td>
-                            <td><input type="radio" name="q4"></td>
-                            <td><input type="radio" name="q4"></td>
-                        </tr>
-
-                        <tr>
-                            <td>5</td>
-                            <td>Course proceeded as per schedule.</td>
-                            <td><input type="radio" name="q5"></td>
-                            <td><input type="radio" name="q5"></td>
-                            <td><input type="radio" name="q5"></td>
-                            <td><input type="radio" name="q5"></td>
-                        </tr>
-                    </table>
-
+                <div id="message" class="alert alert-info mt-3">
+                    Loading course questions...
                 </div>
-                <div class="d-flex justify-content-between mt-3">
-                    <a href="instructor-evaluation.html" class="btn btn-outline-primary">← Previous</a>
-                    <a href="facilities-comments.html" id="courseNext" class="btn btn-navy">Next: Facilities →</a>
 
-                </div>
+                <form id="courseForm" style="display:none;">
+
+                    <div class="table-responsive">
+                        <table class="table-custom">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Question</th>
+                                    <th>Excellent</th>
+                                    <th>Good</th>
+                                    <th>Average</th>
+                                    <th>Below Average</th>
+                                </tr>
+                            </thead>
+                            <tbody id="questionsBody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-3 flex-wrap gap-2">
+
+                        <a href="instructor-evaluation.html" class="btn btn-outline-primary">
+                            ← Previous
+                        </a>
+
+                        <div>
+                            <button type="button" id="saveCourse" class="btn btn-outline-primary me-2">
+                                Save Ratings
+                            </button>
+
+                            <button type="button" id="courseNext" class="btn btn-navy">
+                                Next: Facilities →
+                            </button>
+                        </div>
+
+                    </div>
+
+                </form>
+
             </div>
         </section>
-
     </main>
 
-    <script src="../js/app.js"></script>
+    <script>
+        const API_URL = "http://localhost:5000/api";
+        const token = localStorage.getItem("token");
+
+        const user = JSON.parse(
+            localStorage.getItem("user") || "{}"
+        );
+
+        const message = document.getElementById("message");
+        const form = document.getElementById("courseForm");
+        const questionsBody = document.getElementById("questionsBody");
+
+        document.getElementById("studentName").textContent =
+            user.name || user.full_name || "Student";
+
+        if (!token) {
+            window.location.href = "login.html";
+        }
+
+        const savedRatings = JSON.parse(
+            localStorage.getItem("courseRatings") || "{}"
+        );
+
+        let courseQuestions = [];
+
+        const labels = [
+            "Excellent",
+            "Good",
+            "Average",
+            "Below Average"
+        ];
+
+        function fieldValue(object, fields) {
+            for (const field of fields) {
+                if (object[field] !== undefined &&
+                    object[field] !== null &&
+                    object[field] !== "") {
+                    return object[field];
+                }
+            }
+            return null;
+        }
+
+        function questionText(question) {
+            return fieldValue(question, [
+                "question_text",
+                "question",
+                "text",
+                "title"
+            ]) || "Question";
+        }
+
+        function optionLabel(option) {
+            return String(fieldValue(option, [
+                "option_text",
+                "option_label",
+                "option_name",
+                "label",
+                "text",
+                "name"
+            ]) || "");
+        }
+
+        function optionScore(option, label) {
+            const score = fieldValue(option, [
+                "option_value",
+                "rating_value",
+                "score",
+                "value"
+            ]);
+
+            if (score !== null) return score;
+
+            return {
+                "Excellent": 5,
+                "Good": 4,
+                "Average": 3,
+                "Below Average": 2
+            }[label] ?? "";
+        }
+
+        function showError(error) {
+            console.error(error);
+            message.className = "alert alert-danger mt-3";
+            message.textContent =
+                error.message || "Unable to load course questions.";
+        }
+
+        async function loadCourseQuestions() {
+            try {
+                const headers = {
+                    "Authorization": `Bearer ${token}`
+                };
+
+                const [questionsResponse, optionsResponse] =
+                    await Promise.all([
+                        fetch(`${API_URL}/questions`, { headers }),
+                        fetch(`${API_URL}/feedback-options`, { headers })
+                    ]);
+
+                const questionsData = await questionsResponse.json();
+                const optionsData = await optionsResponse.json();
+
+                if (!questionsResponse.ok || !optionsResponse.ok) {
+                    throw new Error(
+                        questionsData.message ||
+                        optionsData.message ||
+                        "Could not load feedback data."
+                    );
+                }
+
+                const allQuestions = questionsData.data || [];
+                const allOptions = optionsData.data || [];
+
+                const courseSection = allQuestions.filter(question => {
+                    const section = String(fieldValue(question, [
+                        "section",
+                        "category",
+                        "question_category",
+                        "section_name"
+                    ]) || "").toLowerCase();
+
+                    return section.includes("course");
+                });
+
+                // Backend currently stores Course questions as IDs 11–15.
+                courseQuestions = (
+                    courseSection.length >= 5
+                        ? courseSection
+                        : allQuestions.filter(question =>
+                            Number(question.id) >= 11 &&
+                            Number(question.id) <= 15
+                        )
+                ).sort((a, b) => Number(a.id) - Number(b.id));
+
+                if (courseQuestions.length !== 5) {
+                    throw new Error(
+                        `Expected 5 course questions; found ${courseQuestions.length}.`
+                    );
+                }
+
+                questionsBody.innerHTML = "";
+
+                courseQuestions.forEach((question, index) => {
+                    const questionOptions = allOptions.filter(option =>
+                        String(option.question_id) === String(question.id)
+                    );
+
+                    const orderedOptions = labels.map(label =>
+                        questionOptions.find(option =>
+                            optionLabel(option).toLowerCase() ===
+                            label.toLowerCase()
+                        )
+                    );
+
+                    if (orderedOptions.some(option => !option)) {
+                        throw new Error(
+                            `Question ${question.id} is missing one or more rating options.`
+                        );
+                    }
+
+                    const row = document.createElement("tr");
+
+                    const numberCell = document.createElement("td");
+                    numberCell.textContent = index + 1;
+
+                    const textCell = document.createElement("td");
+                    textCell.textContent = questionText(question);
+
+                    row.append(numberCell, textCell);
+
+                    orderedOptions.forEach((option, optionIndex) => {
+                        const cell = document.createElement("td");
+                        cell.className = "text-center";
+
+                        const radio = document.createElement("input");
+                        radio.type = "radio";
+                        radio.name = `question_${question.id}`;
+                        radio.value = option.id;
+                        radio.required = optionIndex === 0;
+
+                        radio.dataset.questionId = question.id;
+                        radio.dataset.optionId = option.id;
+                        radio.dataset.label = labels[optionIndex];
+                        radio.dataset.score = optionScore(
+                            option,
+                            labels[optionIndex]
+                        );
+
+                        radio.setAttribute(
+                            "aria-label",
+                            `${questionText(question)} - ${labels[optionIndex]}`
+                        );
+
+                        const saved = savedRatings[question.id];
+
+                        if (saved &&
+                            String(saved.optionId) === String(option.id)) {
+                            radio.checked = true;
+                        }
+
+                        cell.appendChild(radio);
+                        row.appendChild(cell);
+                    });
+
+                    questionsBody.appendChild(row);
+                });
+
+                message.style.display = "none";
+                form.style.display = "block";
+
+            } catch (error) {
+                showError(error);
+            }
+        }
+
+        function collectCourseRatings() {
+            const ratings = {};
+
+            for (const question of courseQuestions) {
+                const selected = form.querySelector(
+                    `input[name="question_${question.id}"]:checked`
+                );
+
+                if (!selected) {
+                    return {
+                        valid: false,
+                        message: `Please rate question: ${questionText(question)}`
+                    };
+                }
+
+                ratings[question.id] = {
+                    questionId: Number(question.id),
+                    optionId: Number(selected.dataset.optionId),
+                    label: selected.dataset.label,
+                    score: Number(selected.dataset.score)
+                };
+            }
+
+            return { valid: true, ratings };
+        }
+
+        function saveCourseRatings() {
+            const ratings = {};
+
+            for (const question of courseQuestions) {
+                const selected = form.querySelector(
+                    `input[name="question_${question.id}"]:checked`
+                );
+
+                if (!selected) {
+                    message.style.display = "block";
+                    message.className = "alert alert-warning mt-3";
+                    message.textContent =
+                        `Please rate question: ${questionText(question)}`;
+                    return false;
+                }
+
+                ratings[String(question.id)] = {
+                    questionId: Number(question.id),
+                    optionId: Number(selected.dataset.optionId),
+                    label: selected.dataset.label,
+                    score: Number(selected.dataset.score)
+                };
+            }
+
+            if (Object.keys(ratings).length !== 5) {
+                message.style.display = "block";
+                message.className = "alert alert-danger mt-3";
+                message.textContent =
+                    "All 5 course questions must be answered.";
+                return false;
+            }
+
+            try {
+                localStorage.setItem("courseRatings", JSON.stringify(ratings));
+
+                // Verify that browser storage actually contains the ratings.
+                const saved = JSON.parse(
+                    localStorage.getItem("courseRatings") || "{}"
+                );
+
+                if (Object.keys(saved).length !== 5) {
+                    throw new Error("Course ratings could not be verified in storage.");
+                }
+
+                message.style.display = "block";
+                message.className = "alert alert-success mt-3";
+                message.textContent = "All 5 course ratings saved successfully.";
+
+                console.log("Saved course ratings:", saved);
+                return true;
+
+            } catch (error) {
+                console.error("Saving course ratings failed:", error);
+                message.style.display = "block";
+                message.className = "alert alert-danger mt-3";
+                message.textContent =
+                    "Could not save ratings. Please check the browser console.";
+                return false;
+            }
+        }
+
+
+        document.getElementById("saveCourse").addEventListener(
+            "click",
+            saveCourseRatings
+        );
+
+        document.getElementById("courseNext").addEventListener(
+            "click",
+            function () {
+                if (saveCourseRatings()) {
+                    window.location.href = "facilities-comments.html";
+                }
+            }
+        );
+
+        loadCourseQuestions();
+    </script>
 
 </body>
 

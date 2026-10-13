@@ -7,6 +7,7 @@ const {
     getFeedbackSubmissions,
     getFeedbackSubmissionById,
     createFeedbackSubmission,
+    completeFeedbackSubmission,
     updateFeedbackSubmission,
     deleteFeedbackSubmission
 } = require("../controllers/feedbackSubmission.controller");
@@ -15,26 +16,9 @@ const router = express.Router();
 
 router.get("/", protect, getFeedbackSubmissions);
 router.get("/:id", protect, getFeedbackSubmissionById);
-
-router.post(
-    "/",
-    protect,
-    allowRoles("Student", "Admin"),
-    createFeedbackSubmission
-);
-
-router.put(
-    "/:id",
-    protect,
-    allowRoles("Admin"),
-    updateFeedbackSubmission
-);
-
-router.delete(
-    "/:id",
-    protect,
-    allowRoles("Admin"),
-    deleteFeedbackSubmission
-);
+router.post("/complete", protect, allowRoles("Student", "Admin"), completeFeedbackSubmission);
+router.post("/", protect, allowRoles("Student", "Admin"), createFeedbackSubmission);
+router.put("/:id", protect, allowRoles("Admin"), updateFeedbackSubmission);
+router.delete("/:id", protect, allowRoles("Admin"), deleteFeedbackSubmission);
 
 module.exports = router;

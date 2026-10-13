@@ -5,63 +5,128 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
 </head>
 
 <body>
-    <aside class="sidebar">
-        <div class="brand">
 
-            <div class="logo">
-                CS
-            </div>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="logo">CS</div>
+
             <div>
                 CS TECHNOLOGIES
                 <small>RAWALPINDI</small>
             </div>
         </div>
 
-        <a href="student-dashboard.html" class="nav-link-custom active">Dashboard</a>
-        <a href="my-courses.html" class="nav-link-custom">My Courses</a>
-        <a href="course-information.html" class="nav-link-custom">Feedback</a>
-        <a href="submission-confirmation.html" class="nav-link-custom">Submitted</a>
-        <a href="profile-settings.html" class="nav-link-custom">Profile</a>
-        <a href="profile-settings.html" class="nav-link-custom">Settings</a>
+        <a href="student-dashboard.html" class="nav-link-custom active">
+            Dashboard
+        </a>
+
+        <a href="my-courses.html" class="nav-link-custom">
+            My Courses
+        </a>
+
+        <a href="course-information.html" class="nav-link-custom">
+            Feedback
+        </a>
+
+        <a href="submission-confirmation.html" class="nav-link-custom">
+            Submitted
+        </a>
+
+        <a href="profile-settings.html" class="nav-link-custom">
+            Profile
+        </a>
+
+        <a href="profile-settings.html" class="nav-link-custom">
+            Settings
+        </a>
 
         <div class="logout">
-            <a href="login.html" class="nav-link-custom">Logout</a>
+            <a href="login.html" class="nav-link-custom" id="logoutBtn">
+                Logout
+            </a>
         </div>
+
     </aside>
 
+
+    <!-- MAIN -->
     <main class="main">
+
+        <!-- TOPBAR -->
         <header class="topbar">
+
             <div class="brand">
 
                 <div class="logo">
                     CS
                 </div>
+
                 <div>
                     CS TECHNOLOGIES
                     <small>RAWALPINDI</small>
                 </div>
+
             </div>
-            <b>Ali Hassan</b>
+
+            <b id="studentName">Student</b>
+
         </header>
 
+
+        <!-- CONTENT -->
         <section class="content">
+
+            <!-- HEADER -->
             <div class="d-flex justify-content-between mb-4">
 
                 <div>
-                    <h2 class="title">Welcome, Ali Hassan 👋</h2>
-                    <p class="muted">Here is your feedback overview.</p>
+
+                    <h2 class="title" id="welcomeMessage">
+                        Welcome 👋
+                    </h2>
+
+                    <p class="muted">
+                        Here is your feedback overview.
+                    </p>
+
                 </div>
 
-                <button class="btn btn-outline-primary" data-go="profile-settings.html">My Profile</button>
+                <button
+                    class="btn btn-outline-primary"
+                    data-go="profile-settings.html">
+
+                    My Profile
+
+                </button>
+
             </div>
+
+
+            <!-- LOADING -->
+            <div id="loadingMessage" class="alert alert-info">
+                Loading your dashboard...
+            </div>
+
+
+            <!-- ERROR -->
+            <div
+                id="dashboardError"
+                class="alert alert-danger d-none">
+            </div>
+
 
             <!-- STATS -->
             <div class="row g-3 mb-4">
+
+                <!-- Pending -->
                 <div class="col-6 col-lg-3">
 
                     <div class="card-custom">
@@ -69,166 +134,458 @@
                         <small class="muted">
                             Pending Evaluations
                         </small>
-                        <div class="kpi">
-                            2
+
+                        <div
+                            class="kpi"
+                            id="pendingCount">
+                            0
                         </div>
+
                         <small class="muted">
                             Courses
                         </small>
+
                     </div>
+
                 </div>
 
+
+                <!-- Submitted -->
                 <div class="col-6 col-lg-3">
+
                     <div class="card-custom">
 
                         <small class="muted">
                             Submitted Evaluations
                         </small>
-                        <div class="kpi">
-                            4
+
+                        <div
+                            class="kpi"
+                            id="submittedCount">
+                            0
                         </div>
+
                         <small class="muted">
                             Courses
                         </small>
+
                     </div>
+
                 </div>
 
+
+                <!-- Total -->
                 <div class="col-6 col-lg-3">
+
                     <div class="card-custom">
 
                         <small class="muted">
                             Total Courses
                         </small>
-                        <div class="kpi">
-                            6
+
+                        <div
+                            class="kpi"
+                            id="totalCourses">
+                            0
                         </div>
+
                         <small class="muted">
                             Enrolled
                         </small>
+
                     </div>
+
                 </div>
 
+
+                <!-- Completion -->
                 <div class="col-6 col-lg-3">
+
                     <div class="card-custom">
 
                         <small class="muted">
                             Completion Rate
                         </small>
-                        <div class="kpi">
-                            66%
+
+                        <div
+                            class="kpi"
+                            id="completionRate">
+                            0%
                         </div>
+
                         <small class="muted">
                             This Period
                         </small>
+
                     </div>
+
                 </div>
 
             </div>
 
-            <!-- PENDING -->
+
+            <!-- PENDING EVALUATIONS -->
             <div class="card-custom mb-4">
+
                 <h5 class="title">
                     Pending Evaluations
                 </h5>
 
-                <div class="border rounded p-3 mt-3">
-                    <div class="row align-items-center">
+                <div id="pendingEvaluations">
 
-                        <div class="col-lg-7">
-                            <h6 class="title">
-                                Web Development
-                            </h6>
-                            <small class="muted">
-                                Batch: WD-12 |
-                                Instructor: Mr. Usman
-                            </small>
-                        </div>
+                    <p class="muted mt-3">
+                        Loading...
+                    </p>
 
-                        <div class="col-lg-5 text-lg-end mt-3 mt-lg-0">
-                            <span class="badge-soft badge-red">
-                                Due: 15 May 2025
-                            </span>
-                            <button class="btn btn-navy btn-sm" data-go="course-information.html">
-                                Give Feedback →
-                            </button>
-                        </div>
-                    </div>
                 </div>
 
-                <div class="border rounded p-3 mt-3">
-                    <div class="row align-items-center">
-
-                        <div class="col-lg-7">
-                            <h6 class="title">
-                                Database Systems
-                            </h6>
-                            <small class="muted">
-                                Batch: DB-08 |
-                                Instructor: Ms. Ayesha
-                            </small>
-                        </div>
-
-                        <div class="col-lg-5 text-lg-end mt-3 mt-lg-0">
-                            <span class="badge-soft badge-red">
-                                Due: 18 May 2025
-                            </span>
-                            <button class="btn btn-navy btn-sm" data-go="course-information.html">
-                                Give Feedback →
-                            </button>
-                        </div>
-                    </div>
-                </div>
             </div>
 
-            <!-- RECENT -->
+
+            <!-- RECENT SUBMISSIONS -->
             <div class="card-custom">
+
                 <div class="d-flex justify-content-between">
+
                     <h5 class="title">
                         Recently Submitted
                     </h5>
+
                     <a href="my-courses.html">
                         View All
                     </a>
+
                 </div>
+
 
                 <div class="table-responsive mt-3">
+
                     <table class="table-custom">
-                        <tr>
-                            <th>Course</th>
-                            <th>Batch</th>
-                            <th>Instructor</th>
-                            <th>Submitted On</th>
-                            <th>Status</th>
-                        </tr>
-                        <tr>
-                            <td>UI/UX Design</td>
-                            <td>UX-10</td>
-                            <td>Mr. Bilal</td>
-                            <td>10 May 2025</td>
-                            <td>
-                                <span class="badge-soft badge-green">
-                                    Completed
-                                </span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Python Programming</td>
-                            <td>PY-21</td>
-                            <td>Mr. Hamza</td>
-                            <td>08 May 2025</td>
-                            <td>
-                                <span class="badge-soft badge-green">
-                                    Completed
-                                </span>
-                            </td>
-                        </tr>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Course</th>
+                                <th>Batch</th>
+                                <th>Instructor</th>
+                                <th>Submitted On</th>
+                                <th>Status</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="recentSubmissions">
+
+                            <tr>
+
+                                <td colspan="5" class="text-center muted">
+                                    Loading...
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
                     </table>
+
                 </div>
+
             </div>
+
         </section>
+
     </main>
 
+
     <script src="../js/app.js"></script>
+
+
+    <!-- DASHBOARD API -->
+    <script>
+
+        const API_BASE_URL = "http://localhost:5000/api";
+
+
+        document.addEventListener("DOMContentLoaded", async () => {
+
+            const token = localStorage.getItem("token");
+            const storedUser = localStorage.getItem("user");
+
+            const loadingMessage =
+                document.getElementById("loadingMessage");
+
+            const errorMessage =
+                document.getElementById("dashboardError");
+
+
+            /*
+             * User must be logged in
+             */
+
+            if (!token) {
+
+                window.location.href = "login.html";
+                return;
+
+            }
+
+
+            /*
+             * Get logged-in user
+             */
+
+            let user = null;
+
+            try {
+
+                user = storedUser
+                    ? JSON.parse(storedUser)
+                    : null;
+
+            } catch (error) {
+
+                console.error("Invalid user data");
+
+            }
+
+
+            /*
+             * Display student name
+             */
+
+            if (user && user.name) {
+
+                document.getElementById("studentName").textContent =
+                    user.name;
+
+                document.getElementById("welcomeMessage").textContent =
+                    `Welcome, ${user.name} 👋`;
+
+            }
+
+
+            /*
+             * Get courses
+             */
+
+            try {
+
+                const response = await fetch(
+                    `${API_BASE_URL}/courses`,
+                    {
+                        method: "GET",
+
+                        headers: {
+                            "Authorization": `Bearer ${token}`,
+                            "Content-Type": "application/json"
+                        }
+                    }
+                );
+
+
+                if (!response.ok) {
+
+                    if (response.status === 401) {
+
+                        localStorage.removeItem("token");
+                        localStorage.removeItem("user");
+
+                        window.location.href = "login.html";
+                        return;
+
+                    }
+
+                    throw new Error(
+                        `Course API returned ${response.status}`
+                    );
+
+                }
+
+
+                const result = await response.json();
+
+                console.log("Courses API:", result);
+
+
+                /*
+                 * Handle different possible API response formats
+                 */
+
+                let courses = [];
+
+                if (Array.isArray(result)) {
+
+                    courses = result;
+
+                } else if (Array.isArray(result.data)) {
+
+                    courses = result.data;
+
+                } else if (Array.isArray(result.courses)) {
+
+                    courses = result.courses;
+
+                }
+
+
+                /*
+                 * Display total courses
+                 */
+
+                document.getElementById("totalCourses").textContent =
+                    courses.length;
+
+
+                /*
+                 * Since enrollment/submission information
+                 * is handled separately, keep these values
+                 * safe until those APIs are connected.
+                 */
+
+                document.getElementById("pendingCount").textContent = "0";
+
+                document.getElementById("submittedCount").textContent = "0";
+
+                document.getElementById("completionRate").textContent = "0%";
+
+
+                /*
+                 * Display courses as pending feedback
+                 */
+
+                const pendingContainer =
+                    document.getElementById("pendingEvaluations");
+
+
+                if (courses.length === 0) {
+
+                    pendingContainer.innerHTML = `
+                        <p class="muted mt-3">
+                            No courses available.
+                        </p>
+                    `;
+
+                } else {
+
+                    pendingContainer.innerHTML = "";
+
+                    courses.forEach(course => {
+
+                        const courseName =
+                            course.name ||
+                            course.course_name ||
+                            course.title ||
+                            "Course";
+
+                        const courseId =
+                            course.id ||
+                            course.course_id ||
+                            "";
+
+
+                        pendingContainer.innerHTML += `
+
+                            <div class="border rounded p-3 mt-3">
+
+                                <div class="row align-items-center">
+
+                                    <div class="col-lg-8">
+
+                                        <h6 class="title">
+                                            ${courseName}
+                                        </h6>
+
+                                        <small class="muted">
+                                            Course ID: ${courseId}
+                                        </small>
+
+                                    </div>
+
+
+                                    <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+
+                                        <span class="badge-soft badge-red">
+                                            Feedback Pending
+                                        </span>
+
+                                        <button
+                                            class="btn btn-navy btn-sm mt-2"
+                                            onclick="openFeedback(${courseId})">
+
+                                            Give Feedback →
+
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        `;
+
+                    });
+
+                }
+
+
+                /*
+                 * Hide loading
+                 */
+
+                loadingMessage.classList.add("d-none");
+
+
+            } catch (error) {
+
+                console.error("Dashboard error:", error);
+
+                loadingMessage.classList.add("d-none");
+
+                errorMessage.textContent =
+                    "Unable to load dashboard data. Please make sure the backend server is running.";
+
+                errorMessage.classList.remove("d-none");
+
+            }
+
+        });
+
+
+        /*
+         * Open feedback
+         */
+
+        function openFeedback(courseId) {
+
+            localStorage.setItem(
+                "selectedCourseId",
+                courseId
+            );
+
+            window.location.href =
+                "course-information.html";
+
+        }
+
+
+        /*
+         * Logout
+         */
+
+        document
+            .getElementById("logoutBtn")
+            ?.addEventListener("click", () => {
+
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+                localStorage.removeItem("selectedCourseId");
+
+            });
+
+    </script>
 
 </body>
 

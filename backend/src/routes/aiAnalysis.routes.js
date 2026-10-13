@@ -8,10 +8,18 @@ const {
     getAIAnalysisById,
     createAIAnalysis,
     updateAIAnalysis,
-    deleteAIAnalysis
+    deleteAIAnalysis,
+    analyzeSubmission
 } = require("../controllers/aiAnalysis.controller");
 
 const router = express.Router();
+
+router.post(
+    "/analyze/:submissionId",
+    protect,
+    allowRoles("Admin", "Instructor"),
+    analyzeSubmission
+);
 
 router.get("/", protect, getAIAnalyses);
 router.get("/:id", protect, getAIAnalysisById);
