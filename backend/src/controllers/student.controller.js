@@ -319,11 +319,94 @@ const deleteStudent = (req, res) => {
     });
 };
 
+// GET courses of the logged-in student
+const getMyCourses = (req, res) => {
+    if (req.user.role !== "Student" || !req.user.studentId) {
+        return res.status(403).json({
+            success: false,
+            message: "Student account required"
+        });
+    }
+
+    const studentId = req.user.studentId;
+
+    const sql = `
+        SELECT
+            e.id AS enrollment_id,
+            c.id AS course_id,
+            c.title AS course_title,
+            b.id AS batch_id,
+            b.name AS batch_name,
+            (
+                SELECT GROUP_CONCAT(DISTINCT u.name SEPARATOR ', ')
+                FROM batch_instructors bi
+                JOIN instructors i ON bi.instructor_id = i.id
+                JOIN users u ON i.user_id = u.id
+                WHERE bi.batch_id = b.id
+            ) AS instructor_name,
+            (
+                SELECT COUNT(*)
+                FROM feedback_forms f
+                WHERE f.course_id = c.id
+                  AND f.batch_id = b.id
+                  AND f.is_active = 1
+                  AND NOW() BETWEEN f.open_date AND f.close_date
+            ) AS available_forms,
+            (
+                SELECT COUNT(*)
+                FROM feedback_forms f
+                JOIN feedback_submissions fs
+                  ON fs.form_id = f.id
+                 AND fs.student_id = e.student_id
+                WHERE f.course_id = c.id
+                  AND f.batch_id = b.id
+                  AND f.is_active = 1
+                  AND NOW() BETWEEN f.open_date AND f.close_date
+            ) AS completed_forms
+        FROM enrollments e
+        JOIN batches b ON e.batch_id = b.id
+        JOIN courses c ON b.course_id = c.id
+        WHERE e.student_id = ?
+        ORDER BY e.id DESC
+    `;
+
+    db.query(sql, [studentId], (err, results) => {
+        if (err) {
+            console.error("My courses error:", err);
+            return res.status(500).json({
+                success: false,
+                message: "Failed to fetch your courses"
+            });
+        }
+
+        const data = results.map(course => {
+            const available = Number(course.available_forms);
+            const completed = Number(course.completed_forms);
+
+            return {
+                ...course,
+                status: available === 0
+                    ? "No active feedback"
+                    : completed >= available
+                        ? "Completed"
+                        : "Pending"
+            };
+        });
+
+        res.json({
+            success: true,
+            count: data.length,
+            data
+        });
+    });
+};
+
 
 module.exports = {
     getStudents,
     getStudentById,
     createStudent,
     updateStudent,
-    deleteStudent
+    deleteStudent,
+    getMyCourses
 };

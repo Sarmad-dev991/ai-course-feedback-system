@@ -35,17 +35,13 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 
-// =========================
 // Global Middleware
-// =========================
 
 app.use(cors());
 app.use(express.json());
 
 
-// =========================
 // API Routes
-// =========================
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
@@ -69,9 +65,7 @@ app.use("/api/text-responses", textResponseRoutes);
 app.use("/api/ai-analyses", aiAnalysisRoutes);
 
 
-// =========================
 // Test API
-// =========================
 
 app.get("/api", (req, res) => {
     res.json({
@@ -80,23 +74,17 @@ app.get("/api", (req, res) => {
 });
 
 
-// =========================
 // 404 Middleware
-// =========================
 
 app.use(notFound);
 
 
-// =========================
 // Error Handling Middleware
-// =========================
 
 app.use(errorHandler);
 
 
-// =========================
 // Start Server
-// =========================
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

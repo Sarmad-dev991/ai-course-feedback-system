@@ -378,10 +378,176 @@ const deleteUser = (req, res) => {
 };
 
 
+
+// Get the currently logged-in user's profile
+const getMyProfile = async (req, res) => {
+    try {
+        db.query(
+            `SELECT 
+                u.id,
+                u.name,
+                u.email,
+                u.is_active,
+                u.created_at,
+                r.name AS role,
+                s.student_id
+             FROM users u
+             LEFT JOIN roles r ON u.role_id = r.id
+             LEFT JOIN students s ON s.user_id = u.id
+             WHERE u.id = ?`,
+            [req.user.userId],
+            (error, results) => {
+                if (error) {
+                    console.error("Profile database error:", error.message);
+
+                    return res.status(500).json({
+                        success: false,
+                        message: "Unable to load profile."
+                    });
+                }
+
+                if (results.length === 0) {
+                    return res.status(404).json({
+                        success: false,
+                        message: "User not found."
+                    });
+                }
+
+                return res.status(200).json({
+                    success: true,
+                    user: results[0]
+                });
+            }
+        );
+    } catch (error) {
+        console.error("getMyProfile error:", error.message);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to load profile."
+        });
+    }
+};
+
+
+// Update the currently logged-in user's own name/email
+const updateMyProfile = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const { name, email } = req.body;
+
+        if (
+            typeof name !== "string" ||
+            typeof email !== "string" ||
+            !name.trim() ||
+            !email.trim()
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Name and email are required."
+            });
+        }
+
+        const cleanName = name.trim();
+        const cleanEmail = email.trim().toLowerCase();
+
+        if (cleanName.length > 100) {
+            return res.status(400).json({
+                success: false,
+                message: "Name must be 100 characters or fewer."
+            });
+        }
+
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!emailPattern.test(cleanEmail)) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter a valid email address."
+            });
+        }
+
+        const [existing] = await db.query(
+            "SELECT id FROM users WHERE email = ? AND id != ? LIMIT 1",
+            [cleanEmail, userId]
+        );
+
+        if (existing.length > 0) {
+            return res.status(409).json({
+                success: false,
+                message: "This email is already in use."
+            });
+        }
+
+        const [result] = await db.query(
+            `UPDATE users
+             SET name = ?, email = ?
+             WHERE id = ?`,
+            [cleanName, cleanEmail, userId]
+        );
+
+        if (result.affectedRows === 0) {
+            const [check] = await db.query(
+                "SELECT id FROM users WHERE id = ? LIMIT 1",
+                [userId]
+            );
+
+            if (check.length === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message: "User profile not found."
+                });
+            }
+        }
+
+        const [rows] = await db.query(
+            `SELECT
+                u.id,
+                u.name,
+                u.email,
+                r.name AS role,
+                u.is_active,
+                u.created_at,
+                u.updated_at,
+                s.student_id
+             FROM users u
+             JOIN roles r ON r.id = u.role_id
+             LEFT JOIN students s ON s.user_id = u.id
+             WHERE u.id = ?
+             LIMIT 1`,
+            [userId]
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Profile updated successfully.",
+            user: rows[0]
+        });
+    } catch (error) {
+        console.error("Update my profile error:", error);
+
+        if (error.code === "ER_DUP_ENTRY") {
+            return res.status(409).json({
+                success: false,
+                message: "This email is already in use."
+            });
+        }
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to update profile."
+        });
+    }
+};
+
+
+
 module.exports = {
     getUsers,
     getUserById,
     createUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    getMyProfile,
+    updateMyProfile
 };

@@ -1,3 +1,4 @@
+const db = require("../config/db");
 const {
     findCourse
 } = require("./course.controller");
@@ -401,7 +402,209 @@ const getAdminSummary = (req, res) => {
 };
 
 
+const runDashboardQuery = (sql, params = []) => {
+    return new Promise((resolve, reject) => {
+        db.query(sql, params, (error, results) => {
+            if (error) return reject(error);
+            resolve(results);
+        });
+    });
+};
+
+const getInstructorDashboard = async (req, res) => {
+    try {
+        const userId = Number(req.user.userId);
+
+        if (!Number.isInteger(userId) || userId <= 0) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid instructor account."
+            });
+        }
+
+        // Confirm that this user has an instructor record.
+        const instructorRows = await runDashboardQuery(
+            "SELECT id FROM instructors WHERE user_id = ?",
+            [userId]
+        );
+
+        if (instructorRows.length === 0) {
+            return res.status(403).json({
+                success: false,
+                message: "Instructor profile not found."
+            });
+        }
+
+        // Only courses and batches assigned to this instructor.
+        const courses = await runDashboardQuery(`
+            SELECT DISTINCT
+                c.id AS courseId,
+                c.title AS courseName,
+                b.id AS batchId,
+                b.name AS batchName,
+                b.is_active AS batchActive
+            FROM instructors i
+            JOIN batch_instructors bi
+                ON bi.instructor_id = i.id
+            JOIN batches b
+                ON b.id = bi.batch_id
+            JOIN courses c
+                ON c.id = b.course_id
+            WHERE i.user_id = ?
+            ORDER BY c.title, b.name
+        `, [userId]);
+
+        const metricsRows = await runDashboardQuery(`
+            SELECT
+                COUNT(DISTINCT e.student_id) AS enrolledStudents,
+                COUNT(DISTINCT CASE
+                    WHEN fs.id IS NOT NULL THEN fs.student_id
+                END) AS respondingStudents,
+                COUNT(DISTINCT fs.id) AS totalResponses,
+                COUNT(DISTINCT ff.id) AS feedbackForms
+            FROM instructors i
+            JOIN batch_instructors bi
+                ON bi.instructor_id = i.id
+            JOIN batches b
+                ON b.id = bi.batch_id
+            LEFT JOIN enrollments e
+                ON e.batch_id = b.id
+            LEFT JOIN feedback_forms ff
+                ON ff.batch_id = b.id
+            LEFT JOIN feedback_submissions fs
+                ON fs.form_id = ff.id
+            WHERE i.user_id = ?
+        `, [userId]);
+
+        const ratingRows = await runDashboardQuery(`
+            SELECT
+                LOWER(fq.section) AS section,
+                ROUND(AVG(fo.option_value), 2) AS averageRating,
+                COUNT(rr.id) AS ratingCount
+            FROM instructors i
+            JOIN batch_instructors bi
+                ON bi.instructor_id = i.id
+            JOIN batches b
+                ON b.id = bi.batch_id
+            JOIN feedback_forms ff
+                ON ff.batch_id = b.id
+            JOIN feedback_questions fq
+                ON fq.form_id = ff.id
+            JOIN feedback_submissions fs
+                ON fs.form_id = ff.id
+            JOIN rating_responses rr
+                ON rr.submission_id = fs.id
+               AND rr.question_id = fq.id
+            JOIN feedback_options fo
+                ON fo.id = rr.option_id
+               AND fo.question_id = fq.id
+            WHERE i.user_id = ?
+              AND fo.option_value BETWEEN 1 AND 5
+            GROUP BY LOWER(fq.section)
+        `, [userId]);
+
+        const aiAnalyses = await runDashboardQuery(`
+            SELECT DISTINCT
+                aa.id,
+                aa.submission_id,
+                aa.analysis_type,
+                aa.result,
+                aa.created_at
+            FROM instructors i
+            JOIN batch_instructors bi
+                ON bi.instructor_id = i.id
+            JOIN batches b
+                ON b.id = bi.batch_id
+            JOIN feedback_forms ff
+                ON ff.batch_id = b.id
+            JOIN feedback_submissions fs
+                ON fs.form_id = ff.id
+            JOIN ai_analyses aa
+                ON aa.submission_id = fs.id
+            WHERE i.user_id = ?
+            ORDER BY aa.created_at DESC
+            LIMIT 100
+        `, [userId]);
+
+        const metrics = metricsRows[0] || {};
+        const enrolledStudents = Number(metrics.enrolledStudents || 0);
+        const respondingStudents = Number(metrics.respondingStudents || 0);
+        const totalResponses = Number(metrics.totalResponses || 0);
+
+        const responseRate = enrolledStudents === 0
+            ? 0
+            : Number(
+                ((respondingStudents / enrolledStudents) * 100).toFixed(2)
+            );
+
+        const ratings = {
+            overall: 0,
+            instructor: 0,
+            course: 0,
+            facilities: 0
+        };
+
+        let ratingTotal = 0;
+        let ratingCount = 0;
+
+        for (const row of ratingRows) {
+            const average = Number(row.averageRating || 0);
+            const count = Number(row.ratingCount || 0);
+
+            if (count > 0) {
+                ratingTotal += average * count;
+                ratingCount += count;
+            }
+
+            const section = String(row.section || "").toLowerCase();
+
+            if (Object.prototype.hasOwnProperty.call(ratings, section)) {
+                ratings[section] = average;
+            }
+        }
+
+        ratings.overall = ratingCount > 0
+            ? Number((ratingTotal / ratingCount).toFixed(2))
+            : 0;
+
+        return res.json({
+            success: true,
+            data: {
+                instructor: {
+                    id: instructorRows[0].id,
+                    userId
+                },
+                summary: {
+                    averageRating: ratings.overall,
+                    responseRate,
+                    totalResponses,
+                    enrolledStudents,
+                    respondingStudents,
+                    courses: new Set(
+                        courses.map(course => course.courseId)
+                    ).size,
+                    feedbackForms: Number(metrics.feedbackForms || 0)
+                },
+                ratingsBySection: ratings,
+                assignedCourses: courses,
+                aiAnalyses
+            }
+        });
+
+    } catch (error) {
+        console.error("Instructor dashboard error:", error.message);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to load instructor dashboard."
+        });
+    }
+};
+
+
+
 module.exports = {
     getCourseAnalytics,
-    getAdminSummary
+    getAdminSummary,
+    getInstructorDashboard
 };

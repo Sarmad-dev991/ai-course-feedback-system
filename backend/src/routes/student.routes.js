@@ -8,13 +8,17 @@ const {
     getStudentById,
     createStudent,
     updateStudent,
-    deleteStudent
+    deleteStudent,
+    getMyCourses
 } = require("../controllers/student.controller");
 
 const router = express.Router();
 
+
 router.get("/", protect, getStudents);
+router.get("/my-courses", protect, getMyCourses);
 router.get("/:id", protect, getStudentById);
+
 
 router.post("/", protect, allowRoles("Admin"), createStudent);
 router.put("/:id", protect, allowRoles("Admin"), updateStudent);

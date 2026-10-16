@@ -6,13 +6,23 @@ const protect =
 const allowRoles =
     require("../middleware/role.middleware");
 
+
 const {
     getCourseAnalytics,
-    getAdminSummary
+    getAdminSummary,
+    getInstructorDashboard
 } = require("../controllers/analytics.controller");
 
 
 const router = express.Router();
+
+
+router.get(
+    "/instructor-dashboard",
+    protect,
+    allowRoles("Instructor"),
+    getInstructorDashboard
+);
 
 
 // Course analytics

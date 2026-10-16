@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -13,223 +14,437 @@
     <aside class="sidebar">
         <div class="brand">
             <div class="logo">CS</div>
-
             <div>
                 CS TECHNOLOGIES
                 <small>RAWALPINDI</small>
             </div>
-
         </div>
 
         <a href="instructor-dashboard.html" class="nav-link-custom active">Dashboard</a>
-        <!-- <a href="my-courses.html" class="nav-link-custom">My Courses</a>
-<a href="course-information.html" class="nav-link-custom">Feedback</a> -->
         <a href="ai-insights.html" class="nav-link-custom">AI Insights</a>
         <a href="reports.html" class="nav-link-custom">Reports</a>
         <a href="profile-settings.html" class="nav-link-custom">Profile</a>
 
         <div class="logout">
-            <a href="login.html" class="nav-link-custom">Logout</a>
+            <a href="#" id="logoutLink" class="nav-link-custom">Logout</a>
         </div>
-
     </aside>
 
     <main class="main">
         <header class="topbar">
-
             <div class="brand">
-                <div class="logo">
-                    CS
-                </div>
-
+                <div class="logo">CS</div>
                 <div>
                     CS TECHNOLOGIES
                     <small>RAWALPINDI</small>
                 </div>
-
             </div>
-            <b>Mr. Usman</b>
-
+            <b id="instructorName">Loading...</b>
         </header>
 
         <section class="content">
-
             <h2 class="title">Instructor Dashboard</h2>
+            <p class="muted">Overview of feedback for your assigned courses.</p>
+            <p id="dashboardStatus" class="muted" role="status">Loading dashboard data...</p>
 
-            <p class="muted">Overview of feedback for your courses.</p>
-
-            <!-- KPI -->
-
+            <!-- KPI cards -->
             <div class="row g-3 mb-4">
-
                 <div class="col-6 col-lg-3">
-
                     <div class="card-custom">
-
-                        <small class="muted">
-                            Average Rating
-                        </small>
-
-                        <div class="kpi">
-                            4.32 / 5
-                        </div>
-
-                        <small class="muted">
-                            All Courses
-                        </small>
-                    </div>
-                </div>
-
-                <div class="col-6 col-lg-3">
-
-                    <div class="card-custom">
-
-                        <small class="muted">
-                            Response Rate
-                        </small>
-
-                        <div class="kpi">
-                            78%
-                        </div>
-
-                        <small class="muted">
-                            This Period
-                        </small>
+                        <small class="muted">Average Rating</small>
+                        <div class="kpi" id="averageRating">— / 5</div>
+                        <small class="muted">All Assigned Courses</small>
                     </div>
                 </div>
 
                 <div class="col-6 col-lg-3">
                     <div class="card-custom">
-                        <small class="muted">
-                            Total Responses
-                        </small>
-
-                        <div class="kpi">
-                            128
-                        </div>
-
+                        <small class="muted">Response Rate</small>
+                        <div class="kpi" id="responseRate">—</div>
+                        <small class="muted">Responding Students / Enrolled Students</small>
                     </div>
                 </div>
 
                 <div class="col-6 col-lg-3">
                     <div class="card-custom">
-                        <small class="muted">
-                            Courses
-                        </small>
-
-                        <div class="kpi">3</div>
-
+                        <small class="muted">Total Responses</small>
+                        <div class="kpi" id="totalResponses">—</div>
                     </div>
                 </div>
 
+                <div class="col-6 col-lg-3">
+                    <div class="card-custom">
+                        <small class="muted">Courses</small>
+                        <div class="kpi" id="totalCourses">—</div>
+                        <small class="muted">Assigned Courses</small>
+                    </div>
+                </div>
             </div>
 
-
             <div class="row g-4">
-
                 <div class="col-lg-7">
-
                     <div class="card-custom">
+                        <h5 class="title">Rating Overview</h5>
 
-                        <h5 class="title">
-                            Rating Overview
-                        </h5>
-
-                        <div class="chart">
-
-                            <div class="bar" style="height:90%">
-
-                                <span>4.5</span>
-
+                        <div class="chart" id="ratingChart">
+                            <div class="bar" style="height:0%">
+                                <span>—</span>
                             </div>
-
-                            <div class="bar" style="height:82%">
-
-                                <span>4.1</span>
-
+                            <div class="bar" style="height:0%">
+                                <span>—</span>
                             </div>
-
-                            <div class="bar" style="height:74%">
-
-                                <span>3.7</span>
-
+                            <div class="bar" style="height:0%">
+                                <span>—</span>
                             </div>
-
                         </div>
 
-
                         <div class="d-flex justify-content-around muted">
-
                             <span>Instructor</span>
-
                             <span>Course</span>
-
                             <span>Facilities</span>
-
                         </div>
                     </div>
                 </div>
 
                 <div class="col-lg-5">
                     <div class="card-custom">
-
-                        <h5 class="title">
-                            AI Sentiment Overview
-                        </h5>
-
+                        <h5 class="title">AI Sentiment Overview</h5>
                         <div class="text-center py-5">
-
-                            <div class="kpi text-success">
-                                68% Positive
+                            <div class="kpi text-success" id="positiveSentiment">
+                                Not available
                             </div>
-
-                            <p class="muted">
-                                21% Neutral · 11% Negative
+                            <p class="muted" id="otherSentiments">
+                                AI sentiment data has not been loaded.
                             </p>
-
                         </div>
-
                     </div>
-
                 </div>
 
                 <div class="col-lg-6">
-
                     <div class="card-custom">
-
                         <h5 class="title">Top Topics / Issues</h5>
-                        <ul>
-                            <li>Wi-Fi / Internet — 24</li>
-                            <li>Lab Availability — 18</li>
-                            <li>Course Pace — 16</li>
-                            <li>Project Guidance — 12</li>
-                            <li>Other Facilities — 10</li>
+                        <ul id="topTopics">
+                            <li>Loading topics...</li>
                         </ul>
                     </div>
-
                 </div>
 
                 <div class="col-lg-6">
-
                     <div class="card-custom">
                         <h5 class="title">AI Summary</h5>
-
-                        <p class="muted">
-                            Students are generally satisfied with teaching
-                            and communication. Common issues include
-                            unstable Wi-Fi and limited lab availability.
+                        <p class="muted" id="aiSummary">
+                            Loading saved AI analysis...
                         </p>
-                        <a href="ai-insights.html" class="btn btn-outline-primary">View Full Insights →</a>
+                        <a href="ai-insights.html" class="btn btn-outline-primary">
+                            View Full Insights →
+                        </a>
                     </div>
+                </div>
+            </div>
 
+            <div class="card-custom mt-4">
+                <h5 class="title">My Assigned Courses</h5>
+                <div id="assignedCourses" class="muted">
+                    Loading assigned courses...
                 </div>
             </div>
         </section>
-
     </main>
 
     <script src="../js/app.js"></script>
 
+    <script>
+        (() => {
+            const API_BASE = "http://localhost:5000/api";
+            const token = localStorage.getItem("token");
+
+            const statusEl = document.getElementById("dashboardStatus");
+
+            function setText(id, value) {
+                document.getElementById(id).textContent = value;
+            }
+
+            function showError(message) {
+                statusEl.textContent = message;
+                statusEl.classList.add("text-danger");
+            }
+
+            function formatNumber(value, digits = 2) {
+                const number = Number(value);
+                return Number.isFinite(number) ? number.toFixed(digits) : "0";
+            }
+
+            function getSavedUser() {
+                try {
+                    return JSON.parse(localStorage.getItem("user") || "{}");
+                } catch {
+                    return {};
+                }
+            }
+
+            async function apiGet(path) {
+                const response = await fetch(`${API_BASE}${path}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        Accept: "application/json"
+                    }
+                });
+
+                const result = await response.json().catch(() => ({}));
+
+                if (!response.ok || result.success === false) {
+                    throw new Error(result.message || `Request failed (${response.status})`);
+                }
+
+                return result;
+            }
+
+            function updateRatingChart(ratings) {
+                const values = [
+                    Number(ratings.instructor || 0),
+                    Number(ratings.course || 0),
+                    Number(ratings.facilities || 0)
+                ];
+
+                const bars = document.querySelectorAll("#ratingChart .bar");
+
+                bars.forEach((bar, index) => {
+                    const value = Math.max(0, Math.min(5, values[index]));
+                    bar.style.height = `${value / 5 * 100}%`;
+
+                    let label = bar.querySelector("span");
+                    if (!label) {
+                        label = document.createElement("span");
+                        bar.appendChild(label);
+                    }
+
+                    label.textContent = formatNumber(value);
+                });
+            }
+
+            function renderCourses(courses) {
+                const container = document.getElementById("assignedCourses");
+                container.replaceChildren();
+
+                if (!Array.isArray(courses) || courses.length === 0) {
+                    container.textContent = "No assigned courses or batches found.";
+                    return;
+                }
+
+                const list = document.createElement("ul");
+                list.className = "mb-0";
+
+                courses.forEach(course => {
+                    const item = document.createElement("li");
+                    item.textContent =
+                        `${course.courseName || "Course"} — ${course.batchName || "Batch"}`;
+                    list.appendChild(item);
+                });
+
+                container.appendChild(list);
+            }
+
+            function renderAIAnalyses(analyses) {
+                const summaryEl = document.getElementById("aiSummary");
+                const topicsEl = document.getElementById("topTopics");
+
+                topicsEl.replaceChildren();
+
+                if (!Array.isArray(analyses) || analyses.length === 0) {
+                    summaryEl.textContent = "No saved AI analyses are available yet.";
+                    const item = document.createElement("li");
+                    item.textContent = "No analyzed topics available yet.";
+                    topicsEl.appendChild(item);
+                    return;
+                }
+
+                const parsed = [];
+
+                analyses.forEach(row => {
+                    try {
+                        const result = typeof row.result === "string"
+                            ? JSON.parse(row.result)
+                            : row.result;
+
+                        if (result && typeof result === "object") {
+                            parsed.push(result);
+                        }
+                    } catch {
+                        // Ignore saved results that are not valid JSON.
+                    }
+                });
+
+                if (parsed.length === 0) {
+                    summaryEl.textContent =
+                        "Saved analyses exist, but their result format could not be interpreted.";
+                    const item = document.createElement("li");
+                    item.textContent = "Topic breakdown is not available.";
+                    topicsEl.appendChild(item);
+                    return;
+                }
+
+                // Display only fields that actually exist in saved analysis results.
+                const summaries = [];
+                const topicCounts = new Map();
+                const sentimentCounts = { positive: 0, neutral: 0, negative: 0 };
+
+                function inspect(value) {
+                    if (!value || typeof value !== "object") return;
+
+                    for (const [key, item] of Object.entries(value)) {
+                        const normalizedKey = key.toLowerCase();
+
+                        if (typeof item === "string") {
+                            if (
+                                ["summary", "overall_summary", "insights", "conclusion"]
+                                    .includes(normalizedKey) &&
+                                item.trim()
+                            ) {
+                                summaries.push(item.trim());
+                            }
+
+                            if (normalizedKey.includes("sentiment")) {
+                                const sentiment = item.toLowerCase();
+                                if (sentiment.includes("positive")) sentimentCounts.positive++;
+                                else if (sentiment.includes("negative")) sentimentCounts.negative++;
+                                else if (sentiment.includes("neutral")) sentimentCounts.neutral++;
+                            }
+
+                            if (
+                                ["topic", "issue", "category", "theme"].includes(normalizedKey) &&
+                                item.trim()
+                            ) {
+                                topicCounts.set(
+                                    item.trim(),
+                                    (topicCounts.get(item.trim()) || 0) + 1
+                                );
+                            }
+                        } else if (Array.isArray(item)) {
+                            item.forEach(entry => {
+                                if (typeof entry === "string") {
+                                    topicCounts.set(
+                                        entry,
+                                        (topicCounts.get(entry) || 0) + 1
+                                    );
+                                } else if (entry && typeof entry === "object") {
+                                    inspect(entry);
+                                }
+                            });
+                        } else if (item && typeof item === "object") {
+                            inspect(item);
+                        }
+                    }
+                }
+
+                parsed.forEach(inspect);
+
+                summaryEl.textContent = summaries.length
+                    ? [...new Set(summaries)].join(" ")
+                    : "AI analyses are saved, but no recognized summary field was found.";
+
+                const topics = [...topicCounts.entries()]
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 5);
+
+                if (topics.length) {
+                    topics.forEach(([name, count]) => {
+                        const item = document.createElement("li");
+                        item.textContent = `${name} — ${count}`;
+                        topicsEl.appendChild(item);
+                    });
+                } else {
+                    const item = document.createElement("li");
+                    item.textContent = "No structured topic data found in saved analyses.";
+                    topicsEl.appendChild(item);
+                }
+
+                const total = Object.values(sentimentCounts)
+                    .reduce((sum, count) => sum + count, 0);
+
+                if (total > 0) {
+                    const positive = Math.round(sentimentCounts.positive / total * 100);
+                    const neutral = Math.round(sentimentCounts.neutral / total * 100);
+                    const negative = Math.round(sentimentCounts.negative / total * 100);
+
+                    setText("positiveSentiment", `${positive}% Positive`);
+                    setText(
+                        "otherSentiments",
+                        `${neutral}% Neutral · ${negative}% Negative`
+                    );
+                } else {
+                    setText("positiveSentiment", "Not available");
+                    setText(
+                        "otherSentiments",
+                        "Saved analyses do not contain recognized sentiment labels."
+                    );
+                }
+            }
+
+            async function loadDashboard() {
+                if (!token) {
+                    showError("Please log in to view your instructor dashboard.");
+                    return;
+                }
+
+                const user = getSavedUser();
+
+                if (user.role && user.role !== "Instructor") {
+                    showError("This dashboard is only available to instructor accounts.");
+                    return;
+                }
+
+                try {
+                    const [dashboardResult, profileResult] = await Promise.all([
+                        apiGet("/analytics/instructor-dashboard"),
+                        apiGet("/users/me")
+                    ]);
+
+                    const data = dashboardResult.data || {};
+                    const summary = data.summary || {};
+                    const profile = profileResult.user || {};
+
+                    setText(
+                        "instructorName",
+                        profile.name || user.name || "Instructor"
+                    );
+
+                    setText(
+                        "averageRating",
+                        `${formatNumber(summary.averageRating)} / 5`
+                    );
+
+                    setText(
+                        "responseRate",
+                        `${formatNumber(summary.responseRate)}%`
+                    );
+
+                    setText("totalResponses", summary.totalResponses ?? 0);
+                    setText("totalCourses", summary.courses ?? 0);
+
+                    updateRatingChart(data.ratingsBySection || {});
+                    renderCourses(data.assignedCourses || []);
+                    renderAIAnalyses(data.aiAnalyses || []);
+
+                    statusEl.textContent = "Dashboard data loaded.";
+                    statusEl.classList.remove("text-danger");
+                } catch (error) {
+                    console.error("Instructor dashboard error:", error);
+                    showError(
+                        `${error.message} Check that the backend is running and the instructor dashboard API is configured.`
+                    );
+                }
+            }
+
+            document.getElementById("logoutLink").addEventListener("click", event => {
+                event.preventDefault();
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+                window.location.href = "login.html";
+            });
+
+            loadDashboard();
+        })();
+    </script>
 </body>
 
 </html>
