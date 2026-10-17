@@ -380,166 +380,147 @@ const deleteUser = (req, res) => {
 
 
 // Get the currently logged-in user's profile
-const getMyProfile = async (req, res) => {
-    try {
-        db.query(
-            `SELECT 
-                u.id,
-                u.name,
-                u.email,
-                u.is_active,
-                u.created_at,
-                r.name AS role,
-                s.student_id
-             FROM users u
-             LEFT JOIN roles r ON u.role_id = r.id
-             LEFT JOIN students s ON s.user_id = u.id
-             WHERE u.id = ?`,
-            [req.user.userId],
-            (error, results) => {
-                if (error) {
-                    console.error("Profile database error:", error.message);
+// GET /api/users/me
+const getMyProfile = (req, res) => {
+  const userId = req.user?.userId;
 
-                    return res.status(500).json({
-                        success: false,
-                        message: "Unable to load profile."
-                    });
-                }
+  if (!userId) {
+    return res.status(401).json({
+      success: false,
+      message: "User authentication required",
+    });
+  }
 
-                if (results.length === 0) {
-                    return res.status(404).json({
-                        success: false,
-                        message: "User not found."
-                    });
-                }
+  const sql = `
+    SELECT
+      u.id,
+      u.name,
+      u.email,
+      u.is_active,
+      u.created_at,
+      u.updated_at,
+      r.name AS role,
+      s.student_id,
+      i.instructor_id AS instructor_id
+    FROM users u
+    LEFT JOIN roles r ON r.id = u.role_id
+    LEFT JOIN students s ON s.user_id = u.id
+    LEFT JOIN instructors i ON i.user_id = u.id
+    WHERE u.id = ?
+  `;
 
-                return res.status(200).json({
-                    success: true,
-                    user: results[0]
-                });
-            }
-        );
-    } catch (error) {
-        console.error("getMyProfile error:", error.message);
+  db.query(sql, [userId], (error, results) => {
+    if (error) {
+      console.error("Get profile error:", error.message);
 
-        return res.status(500).json({
-            success: false,
-            message: "Unable to load profile."
-        });
+      return res.status(500).json({
+        success: false,
+        message: "Failed to load profile",
+      });
     }
+
+    if (!results || results.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "User profile not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: results[0],
+    });
+  });
 };
 
 
-// Update the currently logged-in user's own name/email
-const updateMyProfile = async (req, res) => {
-    try {
-        const userId = req.user.userId;
-        const { name, email } = req.body;
 
-        if (
-            typeof name !== "string" ||
-            typeof email !== "string" ||
-            !name.trim() ||
-            !email.trim()
-        ) {
-            return res.status(400).json({
-                success: false,
-                message: "Name and email are required."
-            });
-        }
+// PUT /api/users/me
+const updateMyProfile = (req, res) => {
+  const userId = req.user?.userId;
+  const name = String(req.body.name || "").trim();
+  const email = String(req.body.email || "").trim().toLowerCase();
 
-        const cleanName = name.trim();
-        const cleanEmail = email.trim().toLowerCase();
+  if (!userId) {
+    return res.status(401).json({
+      success: false,
+      message: "User authentication required",
+    });
+  }
 
-        if (cleanName.length > 100) {
-            return res.status(400).json({
-                success: false,
-                message: "Name must be 100 characters or fewer."
-            });
-        }
+  if (!name || name.length > 100) {
+    return res.status(400).json({
+      success: false,
+      message: "Name is required and must not exceed 100 characters",
+    });
+  }
 
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        if (!emailPattern.test(cleanEmail)) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter a valid email address."
-            });
-        }
+  if (!email || !emailPattern.test(email) || email.length > 255) {
+    return res.status(400).json({
+      success: false,
+      message: "Please provide a valid email address",
+    });
+  }
 
-        const [existing] = await db.query(
-            "SELECT id FROM users WHERE email = ? AND id != ? LIMIT 1",
-            [cleanEmail, userId]
-        );
+  // Check whether another user already uses this email.
+  const checkSql = `
+    SELECT id
+    FROM users
+    WHERE email = ? AND id <> ?
+    LIMIT 1
+  `;
 
-        if (existing.length > 0) {
-            return res.status(409).json({
-                success: false,
-                message: "This email is already in use."
-            });
-        }
+  db.query(checkSql, [email, userId], (checkError, existingUsers) => {
+    if (checkError) {
+      console.error("Email check error:", checkError.message);
 
-        const [result] = await db.query(
-            `UPDATE users
-             SET name = ?, email = ?
-             WHERE id = ?`,
-            [cleanName, cleanEmail, userId]
-        );
-
-        if (result.affectedRows === 0) {
-            const [check] = await db.query(
-                "SELECT id FROM users WHERE id = ? LIMIT 1",
-                [userId]
-            );
-
-            if (check.length === 0) {
-                return res.status(404).json({
-                    success: false,
-                    message: "User profile not found."
-                });
-            }
-        }
-
-        const [rows] = await db.query(
-            `SELECT
-                u.id,
-                u.name,
-                u.email,
-                r.name AS role,
-                u.is_active,
-                u.created_at,
-                u.updated_at,
-                s.student_id
-             FROM users u
-             JOIN roles r ON r.id = u.role_id
-             LEFT JOIN students s ON s.user_id = u.id
-             WHERE u.id = ?
-             LIMIT 1`,
-            [userId]
-        );
-
-        return res.status(200).json({
-            success: true,
-            message: "Profile updated successfully.",
-            user: rows[0]
-        });
-    } catch (error) {
-        console.error("Update my profile error:", error);
-
-        if (error.code === "ER_DUP_ENTRY") {
-            return res.status(409).json({
-                success: false,
-                message: "This email is already in use."
-            });
-        }
-
-        return res.status(500).json({
-            success: false,
-            message: "Unable to update profile."
-        });
+      return res.status(500).json({
+        success: false,
+        message: "Failed to validate email",
+      });
     }
-};
 
+    if (existingUsers && existingUsers.length > 0) {
+      return res.status(409).json({
+        success: false,
+        message: "This email is already in use",
+      });
+    }
+
+    const updateSql = `
+      UPDATE users
+      SET name = ?, email = ?
+      WHERE id = ?
+    `;
+
+    db.query(
+      updateSql,
+      [name, email, userId],
+      (updateError) => {
+        if (updateError) {
+          console.error("Update profile error:", updateError.message);
+
+          if (updateError.code === "ER_DUP_ENTRY") {
+            return res.status(409).json({
+              success: false,
+              message: "This email is already in use",
+            });
+          }
+
+          return res.status(500).json({
+            success: false,
+            message: "Failed to update profile",
+          });
+        }
+
+        // Return the updated profile from the database.
+        getMyProfile(req, res);
+      }
+    );
+  });
+};
 
 
 module.exports = {

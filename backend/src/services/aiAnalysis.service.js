@@ -1,4 +1,3 @@
-
 const OpenAI = require("openai");
 
 const isDemoMode = () =>
@@ -142,15 +141,36 @@ const analyzeDemoFeedback = (feedbackText) => {
         topics.push("General Course Feedback");
     }
 
-    return {
-        sentiment,
-        topics,
-        issues,
-        summary:
-            "Demo-mode analysis based on predefined keywords. " +
-            "Review the original feedback before making decisions.",
-        suggestions
-    };
+    const preview = feedbackText.trim().replace(/\s+/g, " ");
+const summaryText = preview.length > 350
+    ? `${preview.slice(0, 347)}...`
+    : preview;
+
+let summaryPrefix = "Feedback is generally neutral.";
+
+if (sentiment === "Positive") {
+    summaryPrefix = "Feedback is generally positive.";
+} else if (sentiment === "Negative") {
+    summaryPrefix = "Feedback highlights concerns that may need attention.";
+} else if (sentiment === "Mixed") {
+    summaryPrefix = "Feedback contains both positive and negative observations.";
+}
+
+if (suggestions.length === 0) {
+    suggestions.push(
+        "Encourage students to provide specific comments about teaching quality, course content, and facilities.",
+        "Collect feedback from more students to identify recurring issues and improvement opportunities.",
+        "Review complaints and suggestions regularly before making course improvements."
+    );
+}
+
+return {
+    sentiment,
+    topics,
+    issues,
+    summary: `${summaryPrefix} Student feedback: "${summaryText}"`,
+    suggestions
+};
 };
 
 const analyzeFeedbackText = async (feedbackText) => {
