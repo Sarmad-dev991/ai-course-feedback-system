@@ -9,6 +9,7 @@ const getUsers = (req, res) => {
     const sql = `
         SELECT
             u.id,
+            u.role_id,
             u.name,
             u.email,
             r.name AS role,

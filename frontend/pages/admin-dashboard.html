@@ -1,184 +1,1256 @@
+﻿
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Admin Dashboard | AI Course Feedback System</title>
 
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+        rel="stylesheet"
+    >
     <link rel="stylesheet" href="../css/style.css">
 
+    <style>
+        :root {
+            --navy: #062b5c;
+            --blue: #1769e0;
+            --background: #f5f8fc;
+            --text: #172033;
+            --muted: #718096;
+            --green: #18a566;
+            --orange: #e7a51d;
+            --red: #d94b50;
+            --border: #e7edf5;
+        }
+
+        body {
+            margin: 0;
+            background: var(--background);
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .dashboard-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 245px;
+            min-width: 245px;
+            min-height: 100vh;
+            padding: 24px 15px;
+            background: linear-gradient(180deg, #062b5c, #031d3f);
+            color: white;
+        }
+
+        .brand {
+            padding: 0 12px 25px;
+            border-bottom: 1px solid rgba(255,255,255,.15);
+            margin-bottom: 25px;
+        }
+
+        .brand-icon {
+            display: inline-flex;
+            width: 42px;
+            height: 42px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: #1769e0;
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+
+        .brand h5 {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0 0 5px;
+        }
+
+        .brand small {
+            color: #b9cce8;
+            font-size: 11px;
+            letter-spacing: 1px;
+        }
+
+        .nav-label {
+            color: #9db4d6;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.3px;
+            padding: 0 12px;
+            margin: 22px 0 10px;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            margin: 4px 0;
+            border-radius: 9px;
+            text-decoration: none;
+            color: #d9e5f6;
+            font-size: 13px;
+            transition: background .2s;
+        }
+
+        .sidebar-link i {
+            font-size: 17px;
+        }
+
+        .sidebar-link:hover,
+        .sidebar-link.active {
+            color: white;
+            background: #1769e0;
+        }
+
+        .sidebar-footer {
+            margin-top: 35px;
+            padding: 15px 12px 0;
+            border-top: 1px solid rgba(255,255,255,.15);
+            font-size: 12px;
+            color: #c6d5eb;
+        }
+
+        .main {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .topbar {
+            min-height: 78px;
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 18px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .topbar h4 {
+            margin: 0;
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        .topbar p {
+            margin: 5px 0 0;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .admin-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .admin-avatar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 39px;
+            height: 39px;
+            border-radius: 50%;
+            background: #e5efff;
+            color: var(--navy);
+            font-size: 18px;
+        }
+
+        .content {
+            padding: 28px 30px;
+        }
+
+        .page-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 22px;
+        }
+
+        .page-heading h2 {
+            font-size: 23px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .page-heading p {
+            color: var(--muted);
+            font-size: 13px;
+            margin: 6px 0 0;
+        }
+
+        .refresh-btn {
+            border: 1px solid #dce5f1;
+            background: white;
+            color: var(--navy);
+            border-radius: 8px;
+            padding: 9px 13px;
+            font-size: 13px;
+        }
+
+        .refresh-btn:hover {
+            background: #edf4ff;
+        }
+
+        .kpi-card,
+        .panel {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 13px;
+            height: 100%;
+            box-shadow: 0 3px 12px rgba(15, 40, 80, .025);
+        }
+
+        .kpi-card {
+            padding: 20px;
+        }
+
+        .kpi-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .kpi-label {
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .kpi-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 11px;
+            font-size: 20px;
+        }
+
+        .icon-blue {
+            color: #1769e0;
+            background: #e8f0ff;
+        }
+
+        .icon-green {
+            color: #18a566;
+            background: #e4f8ee;
+        }
+
+        .icon-orange {
+            color: #bd7c00;
+            background: #fff3d9;
+        }
+
+        .icon-purple {
+            color: #7955cf;
+            background: #f0eaff;
+        }
+
+        .kpi-value {
+            font-size: 29px;
+            font-weight: 700;
+            margin: 16px 0 5px;
+            overflow-wrap: anywhere;
+        }
+
+        .kpi-note {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .panel {
+            padding: 22px;
+        }
+
+        .panel-heading {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .panel-heading h5 {
+            font-size: 15px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .panel-heading p {
+            font-size: 11px;
+            color: var(--muted);
+            margin: 6px 0 0;
+        }
+
+        .overall-rating {
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+            margin-bottom: 18px;
+        }
+
+        .overall-rating .rating-number {
+            font-size: 37px;
+            font-weight: 700;
+            color: var(--navy);
+        }
+
+        .rating-stars {
+            color: var(--orange);
+            letter-spacing: 2px;
+        }
+
+        .rating-item {
+            margin-bottom: 17px;
+        }
+
+        .rating-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .rating-line {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 7px;
+            font-size: 12px;
+        }
+
+        .rating-line strong {
+            font-weight: 700;
+        }
+
+        .rating-track {
+            height: 8px;
+            background: #edf1f7;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .rating-fill {
+            height: 100%;
+            background: var(--blue);
+            border-radius: 20px;
+            transition: width .3s;
+        }
+
+        .trend-summary {
+            font-size: 25px;
+            font-weight: 700;
+            color: var(--navy);
+        }
+
+        .trend-chart {
+            height: 225px;
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            padding: 15px 5px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .trend-column {
+            flex: 1;
+            min-width: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .trend-count {
+            font-size: 10px;
+            color: var(--muted);
+            margin-bottom: 7px;
+        }
+
+        .trend-bar {
+            width: min(34px, 75%);
+            min-height: 3px;
+            background: #1769e0;
+            border-radius: 6px 6px 0 0;
+            transition: height .3s;
+        }
+
+        .trend-month {
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 9px;
+            white-space: nowrap;
+        }
+
+        .issue-row {
+            padding: 13px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .issue-row:last-child {
+            border-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .issue-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .issue-count {
+            flex-shrink: 0;
+            color: var(--navy);
+            background: #edf4ff;
+            border-radius: 7px;
+            padding: 4px 8px;
+        }
+
+        .issue-type {
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 5px;
+        }
+
+        .quick-action {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 15px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text);
+            height: 100%;
+            transition: border-color .2s, transform .2s;
+        }
+
+        .quick-action:hover {
+            border-color: var(--blue);
+            transform: translateY(-2px);
+            color: var(--navy);
+        }
+
+        .action-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            flex-shrink: 0;
+            border-radius: 10px;
+            background: #eaf1ff;
+            color: var(--blue);
+            font-size: 19px;
+        }
+
+        .quick-action strong {
+            display: block;
+            font-size: 12px;
+        }
+
+        .quick-action small {
+            display: block;
+            color: var(--muted);
+            font-size: 10px;
+            margin-top: 4px;
+        }
+
+        .status-message {
+            display: none;
+            font-size: 12px;
+            margin-bottom: 18px;
+            padding: 11px 14px;
+            border-radius: 8px;
+        }
+
+        .status-message.show {
+            display: block;
+        }
+
+        .status-message.error {
+            background: #fff0f0;
+            color: #a5222b;
+        }
+
+        .status-message.info {
+            background: #edf4ff;
+            color: #174b91;
+        }
+
+        .empty-state {
+            color: var(--muted);
+            font-size: 12px;
+            padding: 16px 0;
+        }
+
+        .dashboard-footer {
+            text-align: center;
+            color: var(--muted);
+            font-size: 11px;
+            padding: 24px 0 5px;
+        }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                width: 205px;
+                min-width: 205px;
+            }
+
+            .content {
+                padding: 22px 18px;
+            }
+
+            .topbar {
+                padding: 16px 18px;
+            }
+        }
+
+        @media (max-width: 650px) {
+            .dashboard-layout {
+                display: block;
+            }
+
+            .sidebar {
+                width: 100%;
+                min-width: 0;
+                min-height: auto;
+                padding: 15px;
+            }
+
+            .brand {
+                padding-bottom: 13px;
+                margin-bottom: 12px;
+            }
+
+            .brand-icon {
+                width: 34px;
+                height: 34px;
+                margin-bottom: 6px;
+            }
+
+            .nav-label,
+            .sidebar-footer {
+                display: none;
+            }
+
+            .sidebar nav {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+
+            .sidebar-link {
+                padding: 9px;
+                margin: 0;
+                font-size: 11px;
+            }
+
+            .topbar {
+                min-height: auto;
+            }
+
+            .topbar h4 {
+                font-size: 17px;
+            }
+
+            .content {
+                padding: 18px 13px;
+            }
+
+            .page-heading h2 {
+                font-size: 20px;
+            }
+
+            .panel {
+                padding: 17px;
+            }
+        }
+    </style>
 </head>
 
 <body>
+<div class="dashboard-layout">
+
+    <!-- SIDEBAR -->
     <aside class="sidebar">
         <div class="brand">
-            <div class="logo">CS</div>
-
-            <div>
-                CS TECHNOLOGIES
-                <small>RAWALPINDI</small>
+            <div class="brand-icon">
+                <i class="bi bi-mortarboard-fill"></i>
             </div>
-
-        </div>
-        <a href="admin-dashboard.html" class="nav-link-custom active">Dashboard</a>
-        <a href="#" class="nav-link-custom">Users</a>
-        <a href="admin-courses.html" class="nav-link-custom">Courses</a>
-        <a href="#" class="nav-link-custom">Categories</a>
-        <a href="#" class="nav-link-custom">Batches</a>
-        <a href="#" class="nav-link-custom">Enrollments</a>
-        <a href="#" class="nav-link-custom">Feedback Forms</a>
-        <a href="ai-insights.html" class="nav-link-custom">AI Insights</a>
-        <a href="reports.html" class="nav-link-custom">Reports</a>
-        <a href="audit-logs.html" class="nav-link-custom">Audit Logs</a>
-
-        <div class="logout">
-            <a href="login.html" class="nav-link-custom">Logout</a>
+            <h5>AI Course Feedback System</h5>
+            <small>CS TECHNOLOGIES / RAWALPINDI</small>
         </div>
 
+        <div class="nav-label">MAIN MENU</div>
 
+        <nav>
+            <a class="sidebar-link active" href="admin-dashboard.html">
+                <i class="bi bi-grid-1x2-fill"></i>
+                Dashboard
+            </a>
+
+            <a class="sidebar-link" href="admin-courses.html">
+                <i class="bi bi-book-fill"></i>
+                Courses & Categories
+            </a>
+
+            <!-- <a href="admin-users.html">User Management</a> -->
+            <a class="sidebar-link" href="admin-users.html">
+                <i class="bi bi-people-fill"></i>
+                User Management
+            </a>
+
+            <a class="sidebar-link" href="admin-reports.html">
+                <i class="bi bi-file-earmark-bar-graph-fill"></i>
+                Reports
+            </a>
+
+            <a class="sidebar-link" href="admin-ai-insights.html">
+                <i class="bi bi-stars"></i>
+                AI Insights
+            </a>
+
+            <a class="sidebar-link" href="audit-logs.html">
+                <i class="bi bi-shield-check"></i>
+                Audit Logs
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <i class="bi bi-shield-lock-fill me-1"></i>
+            Admin Portal
+            <div class="mt-2">Secure Feedback Management</div>
+        </div>
     </aside>
+
+    <!-- MAIN CONTENT -->
     <main class="main">
 
         <header class="topbar">
-            <div class="brand">
-                <div class="logo">CS</div>
+            <div>
+                <h4>Admin Dashboard</h4>
+                <p>Overview of your course feedback system</p>
+            </div>
 
+            <div class="admin-badge">
+                <div class="admin-avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
                 <div>
-                    CS TECHNOLOGIES
-                    <small>RAWALPINDI</small>
+                    <div>Administrator</div>
+                    <small class="text-secondary">System Admin</small>
                 </div>
             </div>
-            <b>Admin</b>
-
         </header>
 
+        <div class="content">
 
-        <section class="content">
-
-
-            <h2 class="title">Admin Dashboard</h2>
-
-            <p class="muted">System overview and key statistics.</p>
-
-            <div class="row g-3 mb-4">
-                <div class="col-6 col-lg-3">
-                    <div class="card-custom">
-
-                        <small class="muted">Students</small>
-
-                        <div class="kpi">1,248</div>
-
-                    </div>
+            <div class="page-heading">
+                <div>
+                    <h2>Dashboard Overview</h2>
+                    <p>Live statistics from your database</p>
                 </div>
 
-
-                <div class="col-6 col-lg-3">
-                    <div class="card-custom">
-                        <small class="muted">Instructors</small>
-
-                        <div class="kpi">56</div>
-
-                    </div>
-                </div>
-
-
-                <div class="col-6 col-lg-3">
-
-                    <div class="card-custom">
-
-                        <small class="muted">
-                            Courses
-                        </small>
-
-                        <div class="kpi">34</div>
-                    </div>
-                </div>
-
-
-                <div class="col-6 col-lg-3">
-                    <div class="card-custom">
-                        <small class="muted">Active Batches</small>
-                        <div class="kpi">78</div>
-
-                    </div>
-                </div>
+                <button type="button" class="refresh-btn" id="refreshDashboard">
+                    <i class="bi bi-arrow-clockwise me-1"></i>
+                    Refresh Data
+                </button>
             </div>
 
+            <div id="dashboardStatus" class="status-message" role="status"></div>
 
-            <div class="row g-4">
-                <div class="col-lg-7">
-                    <div class="card-custom">
+            <!-- KPI CARDS -->
+            <div class="row g-3 mb-4">
 
-                        <h5 class="title">Response Rate Over Time</h5>
-
-                        <div class="chart">
-                            <div class="bar" style="height:55%"></div>
-                            <div class="bar" style="height:70%"></div>
-                            <div class="bar" style="height:65%"></div>
-                            <div class="bar" style="height:80%"></div>
-                            <div class="bar" style="height:74%"></div>
-                            <div class="bar" style="height:86%">
-
-                                <span>78%</span>
-
+                <div class="col-6 col-xl-3">
+                    <div class="kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">Total Students</span>
+                            <div class="kpi-icon icon-blue">
+                                <i class="bi bi-people-fill"></i>
                             </div>
                         </div>
+                        <div class="kpi-value" id="totalStudents">â€”</div>
+                        <div class="kpi-note">Registered student records</div>
                     </div>
                 </div>
 
-
-                <div class="col-lg-5">
-
-                    <div class="card-custom">
-
-                        <h5 class="title">Feedback by Category</h5>
-
-                        <div class="kpi">4.02 / 5</div>
-
-                        <p class="muted">Instructor 4.32 <br> Course 4.12 <br> Facilities 3.71</p>
-
+                <div class="col-6 col-xl-3">
+                    <div class="kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">Instructors</span>
+                            <div class="kpi-icon icon-green">
+                                <i class="bi bi-person-workspace"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-value" id="totalInstructors">â€”</div>
+                        <div class="kpi-note">Registered instructor records</div>
                     </div>
                 </div>
 
-
-                <div class="col-lg-5">
-                    <div class="card-custom">
-                        <h5 class="title">Top Issues</h5>
-
-                        <ul>
-                            <li>Wi-Fi / Internet — 86</li>
-                            <li>Lab Availability — 63</li>
-                            <li>Course Pace — 41</li>
-                            <li>Other Facilities — 28</li>
-                        </ul>
-
+                <div class="col-6 col-xl-3">
+                    <div class="kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">Total Courses</span>
+                            <div class="kpi-icon icon-purple">
+                                <i class="bi bi-journal-bookmark-fill"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-value" id="totalCourses">â€”</div>
+                        <div class="kpi-note">Courses in the database</div>
                     </div>
                 </div>
 
-
-                <div class="col-lg-7">
-                    <div class="card-custom">
-                        <h5 class="title">Quick Actions</h5>
-
-                        <a href="admin-courses.html" class="btn btn-primary">Manage Courses</a>
-
-                        <a href="reports.html" class="btn btn-outline-primary">Reports</a>
-
-                        <a href="ai-insights.html" class="btn btn-outline-primary">AI Insights</a>
-
-                        <a href="audit-logs.html" class="btn btn-outline-primary">Audit Logs</a>
-
+                <div class="col-6 col-xl-3">
+                    <div class="kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">Active Batches</span>
+                            <div class="kpi-icon icon-orange">
+                                <i class="bi bi-collection-fill"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-value" id="activeBatches">â€”</div>
+                        <div class="kpi-note">Currently active batches</div>
                     </div>
                 </div>
+
             </div>
 
-        </section>
-    </main>
+            <!-- FEEDBACK SUMMARY -->
+            <div class="row g-3 mb-4">
 
-    <script src="../js/app.js"></script>
+                <div class="col-6 col-xl-3">
+                    <div class="kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">Feedback Forms</span>
+                            <div class="kpi-icon icon-blue">
+                                <i class="bi bi-ui-checks"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-value" id="totalFeedbackForms">â€”</div>
+                        <div class="kpi-note">Forms recorded in database</div>
+                    </div>
+                </div>
+
+                <div class="col-6 col-xl-3">
+                    <div class="kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">Submissions</span>
+                            <div class="kpi-icon icon-green">
+                                <i class="bi bi-chat-square-text-fill"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-value" id="totalResponses">â€”</div>
+                        <div class="kpi-note">Recorded feedback submissions</div>
+                    </div>
+                </div>
+
+                <div class="col-6 col-xl-3">
+                    <div class="kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">Response Rate</span>
+                            <div class="kpi-icon icon-orange">
+                                <i class="bi bi-percent"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-value" id="responseRate">â€”</div>
+                        <div class="kpi-note">Of eligible student/form pairs</div>
+                    </div>
+                </div>
+
+                <div class="col-6 col-xl-3">
+                    <div class="kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">Overall Rating</span>
+                            <div class="kpi-icon icon-purple">
+                                <i class="bi bi-star-fill"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-value">
+                            <span id="overallRating">â€”</span>
+                            <small class="text-secondary fs-6">/ 5</small>
+                        </div>
+                        <div class="kpi-note">Average recorded rating</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- CHARTS AND RATINGS -->
+            <div class="row g-3 mb-4">
+
+                <!-- RESPONSE TREND -->
+                <div class="col-12 col-xl-7">
+                    <section class="panel">
+                        <div class="panel-heading">
+                            <div>
+                                <h5>Feedback Response Trend</h5>
+                                <p>Submissions grouped by month</p>
+                            </div>
+                            <i class="bi bi-bar-chart-line text-primary fs-5"></i>
+                        </div>
+
+                        <div class="trend-summary" id="trendTotal">0</div>
+                        <div class="text-secondary small mb-2">
+                            Submissions in the months shown
+                        </div>
+
+                        <div id="responseTrendChart" class="trend-chart">
+                            <div class="empty-state">Loading chart...</div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- CATEGORY RATINGS -->
+                <div class="col-12 col-xl-5">
+                    <section class="panel">
+                        <div class="panel-heading">
+                            <div>
+                                <h5>Feedback by Category</h5>
+                                <p>Average rating from recorded responses</p>
+                            </div>
+                            <i class="bi bi-star-half text-warning fs-5"></i>
+                        </div>
+
+                        <div class="overall-rating">
+                            <div class="rating-number">
+                                <span id="categoryOverallRating">â€”</span>
+                                <small class="fs-6 text-secondary">/ 5</small>
+                            </div>
+                            <div class="rating-stars">â˜…â˜…â˜…â˜…â˜…</div>
+                            <div class="text-secondary small">Overall average</div>
+                        </div>
+
+                        <div class="rating-item">
+                            <div class="rating-line">
+                                <span>Instructor</span>
+                                <strong id="instructorRating">â€”</strong>
+                            </div>
+                            <div class="rating-track">
+                                <div class="rating-fill" id="instructorRatingBar" style="width:0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="rating-item">
+                            <div class="rating-line">
+                                <span>Course</span>
+                                <strong id="courseRating">â€”</strong>
+                            </div>
+                            <div class="rating-track">
+                                <div class="rating-fill" id="courseRatingBar" style="width:0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="rating-item">
+                            <div class="rating-line">
+                                <span>Facilities</span>
+                                <strong id="facilitiesRating">â€”</strong>
+                            </div>
+                            <div class="rating-track">
+                                <div class="rating-fill" id="facilitiesRatingBar" style="width:0%"></div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+            </div>
+
+            <!-- TOP ISSUES -->
+            <div class="row g-3 mb-4">
+
+                <div class="col-12 col-xl-7">
+                    <section class="panel">
+                        <div class="panel-heading">
+                            <div>
+                                <h5>Top Feedback Issues</h5>
+                                <p>Most frequently repeated written feedback</p>
+                            </div>
+                            <i class="bi bi-exclamation-circle text-danger fs-5"></i>
+                        </div>
+
+                        <div id="topIssuesList">
+                            <div class="empty-state">Loading feedback issues...</div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- QUICK ACTIONS -->
+                <div class="col-12 col-xl-5">
+                    <section class="panel">
+                        <div class="panel-heading">
+                            <div>
+                                <h5>Quick Actions</h5>
+                                <p>Navigate to administration tools</p>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+
+                            <div class="col-12 col-sm-6">
+                                <a class="quick-action" href="courses.html">
+                                    <div class="action-icon">
+                                        <i class="bi bi-book-fill"></i>
+                                    </div>
+                                    <div>
+                                        <strong>Manage Courses</strong>
+                                        <small>Courses and batches</small>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <div class="col-12 col-sm-6">
+                                <a class="quick-action" href="admin-reports.html">
+                                    <div class="action-icon">
+                                        <i class="bi bi-file-earmark-bar-graph-fill"></i>
+                                    </div>
+                                    <div>
+                                        <strong>Reports</strong>
+                                        <small>View reports</small>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <div class="col-12 col-sm-6">
+                                <a class="quick-action" href="admin-ai-insights.html">
+                                    <div class="action-icon">
+                                        <i class="bi bi-stars"></i>
+                                    </div>
+                                    <div>
+                                        <strong>AI Insights</strong>
+                                        <small>Feedback analysis</small>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <div class="col-12 col-sm-6">
+                                <a class="quick-action" href="audit-logs.html">
+                                    <div class="action-icon">
+                                        <i class="bi bi-shield-check"></i>
+                                    </div>
+                                    <div>
+                                        <strong>Audit Logs</strong>
+                                        <small>System activity</small>
+                                    </div>
+                                </a>
+                            </div>
+
+                        </div>
+                    </section>
+                </div>
+
+            </div>
+
+            <div class="dashboard-footer">
+                AI Course Feedback System Â· CS Technologies, Rawalpindi
+                <div id="lastUpdated" class="mt-1">Waiting for database...</div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<script src="../js/app.js"></script>
+
+<script>
+(function () {
+    "use strict";
+
+    const API_URL = "http://localhost:5000/api/analytics/admin-summary";
+
+    const $ = (id) => document.getElementById(id);
+
+    function showStatus(message, type) {
+        const element = $("dashboardStatus");
+        element.textContent = message;
+        element.className = "status-message show " + type;
+    }
+
+    function hideStatus() {
+        const element = $("dashboardStatus");
+        element.textContent = "";
+        element.className = "status-message";
+    }
+
+    function setText(id, value) {
+        const element = $(id);
+        if (element) {
+            element.textContent = value ?? "â€”";
+        }
+    }
+
+    function formatNumber(value) {
+        const number = Number(value);
+        return Number.isFinite(number)
+            ? number.toLocaleString()
+            : "0";
+    }
+
+    function formatRating(value) {
+        const number = Number(value);
+        return Number.isFinite(number) && number > 0
+            ? number.toFixed(2)
+            : "â€”";
+    }
+
+    function normalizeSectionRatings(ratings) {
+        const normalized = {
+            instructor: 0,
+            course: 0,
+            facilities: 0
+        };
+
+        if (!ratings || typeof ratings !== "object") {
+            return normalized;
+        }
+
+        for (const [rawKey, rawValue] of Object.entries(ratings)) {
+            const key = rawKey.toLowerCase();
+            const value = Number(rawValue) || 0;
+
+            if (key.includes("instructor")) {
+                normalized.instructor = value;
+            } else if (key.includes("facilit")) {
+                normalized.facilities = value;
+            } else if (key.includes("course")) {
+                normalized.course = value;
+            }
+        }
+
+        return normalized;
+    }
+
+    function setRating(valueId, barId, value) {
+        const rating = Number(value) || 0;
+
+        setText(valueId, formatRating(rating));
+
+        const bar = $(barId);
+        if (bar) {
+            const percentage = Math.max(0, Math.min(100, rating / 5 * 100));
+            bar.style.width = percentage + "%";
+        }
+    }
+
+    function renderTrend(trend) {
+        const chart = $("responseTrendChart");
+        chart.replaceChildren();
+
+        if (!Array.isArray(trend) || trend.length === 0) {
+            chart.innerHTML =
+                '<div class="empty-state">No monthly submissions recorded yet.</div>';
+            setText("trendTotal", "0");
+            return;
+        }
+
+        const rows = trend.slice(-6);
+        const maxCount = Math.max(
+            1,
+            ...rows.map(row => Number(row.responses) || 0)
+        );
+
+        const total = rows.reduce(
+            (sum, row) => sum + (Number(row.responses) || 0),
+            0
+        );
+
+        setText("trendTotal", formatNumber(total));
+
+        rows.forEach(row => {
+            const count = Number(row.responses) || 0;
+            const column = document.createElement("div");
+            column.className = "trend-column";
+
+            const countLabel = document.createElement("div");
+            countLabel.className = "trend-count";
+            countLabel.textContent = formatNumber(count);
+
+            const bar = document.createElement("div");
+            bar.className = "trend-bar";
+            bar.style.height = Math.max(3, count / maxCount * 150) + "px";
+            bar.title = count + " submissions";
+
+            const month = document.createElement("div");
+            month.className = "trend-month";
+
+            const date = new Date(String(row.month) + "-01T12:00:00");
+            month.textContent = Number.isNaN(date.getTime())
+                ? String(row.month)
+                : date.toLocaleDateString("en", {
+                    month: "short",
+                    year: "2-digit"
+                });
+
+            column.append(countLabel, bar, month);
+            chart.appendChild(column);
+        });
+    }
+
+    function renderIssues(issues) {
+        const container = $("topIssuesList");
+        container.replaceChildren();
+
+        if (!Array.isArray(issues) || issues.length === 0) {
+            const empty = document.createElement("div");
+            empty.className = "empty-state";
+            empty.textContent = "No written feedback issues recorded yet.";
+            container.appendChild(empty);
+            return;
+        }
+
+        issues.forEach(item => {
+            const row = document.createElement("div");
+            row.className = "issue-row";
+
+            const titleRow = document.createElement("div");
+            titleRow.className = "issue-title";
+
+            const issueText = document.createElement("span");
+            issueText.textContent = item.issue || "Feedback";
+            issueText.style.overflowWrap = "anywhere";
+
+            const count = document.createElement("span");
+            count.className = "issue-count";
+            count.textContent = formatNumber(item.mentions);
+
+            titleRow.append(issueText, count);
+
+            const type = document.createElement("div");
+            type.className = "issue-type";
+            type.textContent = item.type
+                ? "Type: " + item.type
+                : "Written feedback";
+
+            row.append(titleRow, type);
+            container.appendChild(row);
+        });
+    }
+
+    function renderDashboard(data) {
+        setText("totalStudents", formatNumber(data.totalStudents));
+        setText("totalInstructors", formatNumber(data.totalInstructors));
+        setText("totalCourses", formatNumber(data.totalCourses));
+        setText("activeBatches", formatNumber(data.activeBatches));
+        setText("totalFeedbackForms", formatNumber(data.totalFeedbackForms));
+        setText("totalResponses", formatNumber(data.totalResponses));
+
+        const responseRate = Number(data.responseRate);
+        setText(
+            "responseRate",
+            Number.isFinite(responseRate)
+                ? responseRate.toFixed(2) + "%"
+                : (data.feedbackResponseRate || "0%")
+        );
+
+        const overall = Number(data.overallRating) || 0;
+        setText("overallRating", formatRating(overall));
+        setText("categoryOverallRating", formatRating(overall));
+
+        const ratings = normalizeSectionRatings(data.ratingsBySection);
+
+        setRating("instructorRating", "instructorRatingBar", ratings.instructor);
+        setRating("courseRating", "courseRatingBar", ratings.course);
+        setRating("facilitiesRating", "facilitiesRatingBar", ratings.facilities);
+
+        renderTrend(data.responseTrend);
+        renderIssues(data.topIssues);
+
+        setText(
+            "lastUpdated",
+            "Last updated: " + new Date().toLocaleString()
+        );
+    }
+
+    async function loadAdminDashboard() {
+        hideStatus();
+
+        const button = $("refreshDashboard");
+        button.disabled = true;
+        button.innerHTML =
+            '<span class="spinner-border spinner-border-sm me-1"></span> Loading';
+
+        try {
+            const token = localStorage.getItem("token");
+
+            if (!token) {
+                throw new Error(
+                    "Login token nahi mila. Admin account se dobara login karein."
+                );
+            }
+
+            const response = await fetch(API_URL, {
+                method: "GET",
+                headers: {
+                    "Authorization": "Bearer " + token,
+                    "Accept": "application/json"
+                }
+            });
+
+            let result;
+
+            try {
+                result = await response.json();
+            } catch {
+                throw new Error("Backend se valid JSON response nahi mila.");
+            }
+
+            if (response.status === 401) {
+                throw new Error(
+                    "Login session expire ho gaya. Dobara login karein."
+                );
+            }
+
+            if (response.status === 403) {
+                throw new Error(
+                    "Admin access required. Admin account se login karein."
+                );
+            }
+
+            if (!response.ok || !result.success) {
+                throw new Error(
+                    result.message || "Dashboard data load nahi ho saka."
+                );
+            }
+
+            if (!result.data) {
+                throw new Error("API response mein dashboard data missing hai.");
+            }
+
+            renderDashboard(result.data);
+
+        } catch (error) {
+            console.error("Admin dashboard error:", error);
+            showStatus(error.message || "Dashboard load nahi hua.", "error");
+        } finally {
+            button.disabled = false;
+            button.innerHTML =
+                '<i class="bi bi-arrow-clockwise me-1"></i> Refresh Data';
+        }
+    }
+
+    $("refreshDashboard").addEventListener("click", loadAdminDashboard);
+
+    loadAdminDashboard();
+})();
+</script>
 
 </body>
-
 </html>
+

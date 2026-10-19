@@ -1,12 +1,13 @@
-// Course ka actual business logic yahan h: courses dekhna, single course dekhna, course create/ update/ delete karna
 
-// Course business logic
 const db = require("../config/db");
+const createAuditLog = require("../utils/auditLogger");
 
+// GET ALL COURSES
 const getCourses = (req, res) => {
     const sql = `
-        SELECT 
+        SELECT
             c.id,
+            c.category_id,
             c.title,
             c.description,
             c.is_active,
@@ -26,7 +27,7 @@ const getCourses = (req, res) => {
             });
         }
 
-        res.json({
+        return res.json({
             success: true,
             count: results.length,
             data: results
@@ -35,12 +36,14 @@ const getCourses = (req, res) => {
 };
 
 
+// GET COURSE BY ID
 const getCourseById = (req, res) => {
     const id = Number(req.params.id);
 
     const sql = `
-        SELECT 
+        SELECT
             c.id,
+            c.category_id,
             c.title,
             c.description,
             c.is_active,
@@ -67,7 +70,7 @@ const getCourseById = (req, res) => {
             });
         }
 
-        res.json({
+        return res.json({
             success: true,
             data: results[0]
         });
@@ -75,8 +78,16 @@ const getCourseById = (req, res) => {
 };
 
 
+// CREATE COURSE
 const createCourse = (req, res) => {
     const { title, category_id, description } = req.body;
+
+    if (!title || !category_id) {
+        return res.status(400).json({
+            success: false,
+            message: "Course title and category are required"
+        });
+    }
 
     const sql = `
         INSERT INTO courses (category_id, title, description)
@@ -85,7 +96,7 @@ const createCourse = (req, res) => {
 
     db.query(
         sql,
-        [category_id, title, description],
+        [category_id, title, description || null],
         (err, result) => {
             if (err) {
                 console.error(err);
@@ -95,14 +106,26 @@ const createCourse = (req, res) => {
                 });
             }
 
-            res.status(201).json({
+            const courseId = result.insertId;
+            const userId = req.user?.userId || req.user?.id || null;
+            const role = req.user?.role || "User";
+
+            createAuditLog({
+                user_id: userId,
+                action: "COURSE_CREATED",
+                entity_type: "course",
+                entity_id: courseId,
+                details: `${role} created course: ${title}`
+            });
+
+            return res.status(201).json({
                 success: true,
                 message: "Course created successfully",
                 data: {
-                    id: result.insertId,
+                    id: courseId,
                     title,
                     category_id,
-                    description
+                    description: description || null
                 }
             });
         }
@@ -110,6 +133,7 @@ const createCourse = (req, res) => {
 };
 
 
+// UPDATE COURSE
 const updateCourse = (req, res) => {
     const id = Number(req.params.id);
     const { title, category_id, description, is_active } = req.body;
@@ -126,7 +150,7 @@ const updateCourse = (req, res) => {
 
     db.query(
         sql,
-        [title, category_id, description, is_active, id],
+        [title ?? null, category_id ?? null, description ?? null, is_active ?? null, id],
         (err, result) => {
             if (err) {
                 console.error(err);
@@ -137,13 +161,58 @@ const updateCourse = (req, res) => {
             }
 
             if (result.affectedRows === 0) {
-                return res.status(404).json({
-                    success: false,
-                    message: "Course not found"
-                });
+                // Check whether the course exists, since an unchanged
+                // record can also produce zero affected rows in MySQL.
+                return db.query(
+                    "SELECT id FROM courses WHERE id = ?",
+                    [id],
+                    (checkErr, rows) => {
+                        if (checkErr) {
+                            console.error(checkErr);
+                            return res.status(500).json({
+                                success: false,
+                                message: "Failed to verify course"
+                            });
+                        }
+
+                        if (rows.length === 0) {
+                            return res.status(404).json({
+                                success: false,
+                                message: "Course not found"
+                            });
+                        }
+
+                        const userId = req.user?.userId || req.user?.id || null;
+                        const role = req.user?.role || "User";
+
+                        createAuditLog({
+                            user_id: userId,
+                            action: "COURSE_UPDATED",
+                            entity_type: "course",
+                            entity_id: id,
+                            details: `${role} updated course ID ${id}`
+                        });
+
+                        return res.json({
+                            success: true,
+                            message: "Course updated successfully"
+                        });
+                    }
+                );
             }
 
-            res.json({
+            const userId = req.user?.userId || req.user?.id || null;
+            const role = req.user?.role || "User";
+
+            createAuditLog({
+                user_id: userId,
+                action: "COURSE_UPDATED",
+                entity_type: "course",
+                entity_id: id,
+                details: `${role} updated course ID ${id}`
+            });
+
+            return res.json({
                 success: true,
                 message: "Course updated successfully"
             });
@@ -152,43 +221,81 @@ const updateCourse = (req, res) => {
 };
 
 
+// DELETE COURSE
 const deleteCourse = (req, res) => {
     const id = Number(req.params.id);
 
-    const sql = `DELETE FROM courses WHERE id = ?`;
+    // Read title first so the log remains meaningful after deletion.
+    db.query(
+        "SELECT title FROM courses WHERE id = ?",
+        [id],
+        (selectErr, rows) => {
+            if (selectErr) {
+                console.error(selectErr);
+                return res.status(500).json({
+                    success: false,
+                    message: "Failed to find course"
+                });
+            }
 
-    db.query(sql, [id], (err, result) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).json({
-                success: false,
-                message: "Failed to delete course"
-            });
+            if (rows.length === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Course not found"
+                });
+            }
+
+            const courseTitle = rows[0].title;
+
+            db.query(
+                "DELETE FROM courses WHERE id = ?",
+                [id],
+                (err, result) => {
+                    if (err) {
+                        console.error(err);
+                        return res.status(500).json({
+                            success: false,
+                            message: "Failed to delete course"
+                        });
+                    }
+
+                    if (result.affectedRows === 0) {
+                        return res.status(404).json({
+                            success: false,
+                            message: "Course not found"
+                        });
+                    }
+
+                    const userId = req.user?.userId || req.user?.id || null;
+                    const role = req.user?.role || "User";
+
+                    createAuditLog({
+                        user_id: userId,
+                        action: "COURSE_DELETED",
+                        entity_type: "course",
+                        entity_id: id,
+                        details: `${role} deleted course: ${courseTitle}`
+                    });
+
+                    return res.json({
+                        success: true,
+                        message: "Course deleted successfully"
+                    });
+                }
+            );
         }
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({
-                success: false,
-                message: "Course not found"
-            });
-        }
-
-        res.json({
-            success: true,
-            message: "Course deleted successfully"
-        });
-    });
+    );
 };
 
 
+// FIND COURSE (used by other backend modules)
 const findCourse = (courseId) => {
     return new Promise((resolve, reject) => {
-        const sql = `SELECT * FROM courses WHERE id = ?`;
+        const sql = "SELECT * FROM courses WHERE id = ?";
 
         db.query(sql, [courseId], (err, results) => {
             if (err) {
-                reject(err);
-                return;
+                return reject(err);
             }
 
             resolve(results[0] || null);

@@ -264,271 +264,265 @@
     </main>
 
 
-    <script>
+    
+<script>
+(() => {
+    const API_URL = "http://localhost:5000/api";
+    const token = localStorage.getItem("token");
 
-        const API_URL = "http://localhost:5000/api";
+    let user = {};
+    try {
+        user = JSON.parse(localStorage.getItem("user") || "{}");
+    } catch {
+        user = {};
+    }
 
-        const token = localStorage.getItem("token");
+    const loadingMessage = document.getElementById("loadingMessage");
+    const courseInfo = document.getElementById("courseInfo");
+    const nextButton = document.getElementById("nextButton");
 
-        const user = JSON.parse(
-            localStorage.getItem("user") || "{}"
-        );
+    const params = new URLSearchParams(window.location.search);
 
+    const requestedCourseId =
+        params.get("courseId") ||
+        params.get("course_id") ||
+        localStorage.getItem("selectedCourseId");
 
-        // -----------------------------------------
-        // Check Login
-        // -----------------------------------------
+    const requestedBatchId =
+        params.get("batchId") ||
+        params.get("batch_id") ||
+        localStorage.getItem("selectedBatchId");
 
-        if (!token) {
+    document.getElementById("studentName").textContent =
+        user.name || user.full_name || "Student";
 
-            window.location.href = "login.html";
+    if (!token) {
+        window.location.href = "login.html";
+        return;
+    }
 
+    async function apiRequest(path) {
+        const response = await fetch(`${API_URL}${path}`, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || result.success === false) {
+            throw new Error(
+                result.message || `Request failed (${response.status})`
+            );
         }
 
+        return result;
+    }
 
-        // -----------------------------------------
-        // Display Student Name
-        // -----------------------------------------
+    function showError(message) {
+        loadingMessage.style.display = "block";
+        loadingMessage.className = "alert alert-danger mt-3";
+        loadingMessage.textContent = message;
+        courseInfo.style.display = "none";
+        nextButton.classList.add("disabled");
+        nextButton.setAttribute("aria-disabled", "true");
+    }
 
-        document.getElementById("studentName").textContent =
-            user.name || user.full_name || "Student";
+    function getValue(object, keys, fallback = "") {
+        for (const key of keys) {
+            if (
+                object[key] !== undefined &&
+                object[key] !== null &&
+                object[key] !== ""
+            ) {
+                return object[key];
+            }
+        }
+        return fallback;
+    }
 
+    async function loadCourseInformation() {
+        try {
+            loadingMessage.style.display = "block";
+            loadingMessage.className = "alert alert-info mt-3";
+            loadingMessage.textContent = "Loading your enrolled course...";
+            nextButton.classList.remove("disabled");
+            nextButton.removeAttribute("aria-disabled");
 
-        // -----------------------------------------
-        // Load Course Information
-        // -----------------------------------------
+            // Load only this logged-in student's enrolled courses.
+            const coursesResult = await apiRequest("/students/my-courses");
+            const courses = Array.isArray(coursesResult.data)
+                ? coursesResult.data
+                : [];
 
-        async function loadCourseInformation() {
+            if (!courses.length) {
+                throw new Error(
+                    "No enrolled course was found for this account."
+                );
+            }
 
-            try {
+            // Match the course selected on My Courses.
+            let enrolledCourse;
 
-                const response = await fetch(
-                    `${API_URL}/feedback-forms`,
-                    {
-                        headers: {
-                            "Authorization": `Bearer ${token}`
-                        }
-                    }
+            if (requestedCourseId) {
+                enrolledCourse = courses.find(course =>
+                    String(course.course_id) === String(requestedCourseId) &&
+                    (
+                        !requestedBatchId ||
+                        String(course.batch_id) === String(requestedBatchId)
+                    )
                 );
 
-
-                const data = await response.json();
-
-
-                console.log("Feedback Forms:", data);
-
-
-                if (!response.ok || !data.success) {
-
+                if (!enrolledCourse) {
                     throw new Error(
-                        data.message || "Unable to load feedback form"
+                        "The selected course/batch is not in your enrollment list. Please select your course from My Courses."
                     );
-
                 }
-
-
-                if (!data.data || data.data.length === 0) {
-
-                    throw new Error(
-                        "No feedback form is available."
-                    );
-
-                }
-
-
-                // -----------------------------------------
-                // Find selected form
-                // -----------------------------------------
-
-                const selectedCourseId =
-                    localStorage.getItem("selectedCourseId");
-
-
-                let form = data.data.find(
-                    item =>
-                        String(item.course_id) ===
-                        String(selectedCourseId)
+            } else if (courses.length === 1) {
+                enrolledCourse = courses[0];
+            } else {
+                throw new Error(
+                    "Please open this page using the Feedback button on your selected course in My Courses."
                 );
+            }
 
+            // Load feedback forms and find the form for this exact course/batch.
+            const formsResult = await apiRequest("/feedback-forms");
+            const forms = Array.isArray(formsResult.data)
+                ? formsResult.data
+                : [];
 
-                // If no selected course, use first form
-                if (!form) {
+            const matchingForms = forms.filter(form =>
+                String(form.course_id) === String(enrolledCourse.course_id) &&
+                String(form.batch_id) === String(enrolledCourse.batch_id)
+            );
 
-                    form = data.data[0];
-
-                }
-
-
-                console.log("Selected Form:", form);
-
-
-                // -----------------------------------------
-                // Save important IDs
-                // -----------------------------------------
-
-                localStorage.setItem(
-                    "selectedFormId",
-                    form.id
+            if (!matchingForms.length) {
+                throw new Error(
+                    "No feedback form is configured for your enrolled course and batch."
                 );
+            }
 
-                localStorage.setItem(
-                    "selectedCourseId",
-                    form.course_id
-                );
+            // Prefer a previously selected form only if it matches this course/batch.
+            const storedFormId = localStorage.getItem("selectedFormId");
+            const form =
+                matchingForms.find(item =>
+                    storedFormId && String(item.id) === String(storedFormId)
+                ) || matchingForms[0];
 
-                localStorage.setItem(
-                    "selectedBatchId",
-                    form.batch_id
-                );
+            const courseTitle = getValue(
+                enrolledCourse,
+                ["course_title", "course_name", "course"],
+                "Course"
+            );
 
+            const batchName = getValue(
+                enrolledCourse,
+                ["batch_name", "batch"],
+                `Batch ${enrolledCourse.batch_id}`
+            );
 
-                // -----------------------------------------
-                // Course Category
-                // -----------------------------------------
+            const instructorName = getValue(
+                enrolledCourse,
+                ["instructor_name", "instructor"],
+                "Not assigned"
+            );
 
-                document.getElementById(
-                    "courseCategory"
-                ).value = "Web Development";
+            const category = getValue(
+                enrolledCourse,
+                ["category_name", "course_category", "category"],
+                getValue(form, ["category_name", "course_category", "category"], "Not specified")
+            );
 
+            // Use status from the student's enrollment/feedback API.
+            const courseStatus = String(
+                getValue(enrolledCourse, ["status"], "Pending")
+            ).toLowerCase();
 
-                // -----------------------------------------
-                // Course
-                // -----------------------------------------
+            const alreadySubmitted = [
+                "completed", "submitted"
+            ].includes(courseStatus);
 
-                document.getElementById(
-                    "courseTitle"
-                ).value =
-                    form.course || "Course";
+            // Save the IDs for the next feedback pages.
+            localStorage.setItem("selectedCourseId", String(enrolledCourse.course_id));
+            localStorage.setItem("selectedBatchId", String(enrolledCourse.batch_id));
+            localStorage.setItem("selectedFormId", String(form.id));
 
+            // Display real data; no hardcoded course title/category.
+            document.getElementById("courseCategory").value = category;
+            document.getElementById("courseTitle").value = courseTitle;
+            document.getElementById("instructorName").value = instructorName;
+            document.getElementById("batchName").value = batchName;
+            document.getElementById("formTitle").value =
+                getValue(form, ["title", "form_title", "name"], "Course Feedback Form");
 
-                // -----------------------------------------
-                // Batch
-                // -----------------------------------------
+            let formStatus = "Open";
 
-                document.getElementById(
-                    "batchName"
-                ).value =
-                    form.batch || `Batch ${form.batch_id}`;
-
-
-                // -----------------------------------------
-                // Form Title
-                // -----------------------------------------
-
-                document.getElementById(
-                    "formTitle"
-                ).value =
-                    form.title || "Course Feedback Form";
-
-
-                // -----------------------------------------
-                // Form Status
-                // -----------------------------------------
-
+            if (alreadySubmitted) {
+                formStatus = "Already Submitted";
+            } else if (
+                Number(form.is_active) === 0 ||
+                form.is_active === false
+            ) {
+                formStatus = "Closed";
+            } else {
                 const now = new Date();
-
-                const openDate =
-                    new Date(form.open_date);
-
-                const closeDate =
-                    new Date(form.close_date);
-
-
-                let status = "Closed";
-
+                const openDate = form.open_date ? new Date(form.open_date) : null;
+                const closeDate = form.close_date ? new Date(form.close_date) : null;
 
                 if (
-                    form.is_active == 1 &&
-                    now >= openDate &&
-                    now <= closeDate
+                    (openDate && !Number.isNaN(openDate.getTime()) && now < openDate) ||
+                    (closeDate && !Number.isNaN(closeDate.getTime()) && now > closeDate)
                 ) {
-
-                    status = "Open";
-
+                    formStatus = "Closed";
                 }
-
-
-                document.getElementById(
-                    "formStatus"
-                ).value = status;
-
-
-                // -----------------------------------------
-                // Show Course Information
-                // -----------------------------------------
-
-                document.getElementById(
-                    "loadingMessage"
-                ).style.display = "none";
-
-
-                document.getElementById(
-                    "courseInfo"
-                ).style.display = "block";
-
-
-            } catch (error) {
-
-                console.error(
-                    "Course information error:",
-                    error
-                );
-
-
-                document.getElementById(
-                    "loadingMessage"
-                ).className =
-                    "alert alert-danger mt-3";
-
-
-                document.getElementById(
-                    "loadingMessage"
-                ).textContent =
-                    error.message ||
-                    "Unable to load course information.";
-
             }
 
+            document.getElementById("formStatus").value = formStatus;
+
+            if (alreadySubmitted) {
+                nextButton.classList.add("disabled");
+                nextButton.setAttribute("aria-disabled", "true");
+                nextButton.textContent = "Feedback Already Submitted";
+                loadingMessage.style.display = "block";
+                loadingMessage.className = "alert alert-success mt-3";
+                loadingMessage.textContent =
+                    "You have already submitted feedback for this course.";
+            } else if (formStatus !== "Open") {
+                nextButton.classList.add("disabled");
+                nextButton.setAttribute("aria-disabled", "true");
+                nextButton.textContent = "Feedback Form Closed";
+                loadingMessage.style.display = "block";
+                loadingMessage.className = "alert alert-warning mt-3";
+                loadingMessage.textContent =
+                    "The feedback form is currently closed or not yet available.";
+            } else {
+                loadingMessage.style.display = "none";
+                nextButton.textContent = "Next: Instructor Evaluation →";
+            }
+
+            courseInfo.style.display = "block";
+
+        } catch (error) {
+            console.error("Course information error:", error);
+            showError(error.message || "Unable to load course information.");
         }
+    }
 
+    nextButton.addEventListener("click", event => {
+        if (
+            nextButton.classList.contains("disabled") ||
+            nextButton.getAttribute("aria-disabled") === "true" ||
+            !localStorage.getItem("selectedFormId")
+        ) {
+            event.preventDefault();
+        }
+    });
 
-        // -----------------------------------------
-        // Next Button
-        // -----------------------------------------
-
-        document.getElementById(
-            "nextButton"
-        ).addEventListener(
-            "click",
-            function (event) {
-
-                const formId =
-                    localStorage.getItem("selectedFormId");
-
-                if (!formId) {
-
-                    event.preventDefault();
-
-                    alert(
-                        "Feedback form information is not loaded yet."
-                    );
-
-                    return;
-
-                }
-
-            }
-        );
-
-
-        // -----------------------------------------
-        // Start
-        // -----------------------------------------
-
-        loadCourseInformation();
-
-    </script>
-
+    loadCourseInformation();
+})();
+</script>
 </body>
-
 </html>

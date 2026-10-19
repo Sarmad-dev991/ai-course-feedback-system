@@ -1,0 +1,577 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports | AI Course Feedback System</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="logo">CS</div>
+            <div>
+                CS TECHNOLOGIES
+                <small>RAWALPINDI</small>
+            </div>
+        </div>
+
+        <a href="admin-dashboard.html" class="nav-link-custom">
+            Dashboard
+        </a>
+        <a href="admin-ai-insights.html" class="nav-link-custom">
+            AI Insights
+        </a>
+        <a href="admin-reports.html" class="nav-link-custom active">
+            Reports
+        </a>
+
+        <div class="logout">
+            <a href="login.html" class="nav-link-custom">Logout</a>
+        </div>
+    </aside>
+
+    <main class="main">
+
+        <header class="topbar">
+            <div class="brand">
+                <div class="logo">CS</div>
+                <div>
+                    CS TECHNOLOGIES
+                    <small>RAWALPINDI</small>
+                </div>
+            </div>
+
+            <b id="instructorName">Administrator</b>
+        </header>
+
+        <section class="content">
+
+            <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
+                <div>
+                    <h2 class="title">Reports</h2>
+                    <p class="muted">
+                        Generate and review feedback reports.
+                    </p>
+                </div>
+
+                <button class="btn btn-navy" id="exportReport">
+                    Export Report
+                </button>
+            </div>
+
+            <div id="pageMessage" class="alert d-none" role="alert"></div>
+
+            <!-- Report Statistics -->
+            <div class="row g-4">
+
+                <div class="col-md-4">
+                    <div class="card-custom">
+                        <small class="muted">Course Performance</small>
+                        <div class="kpi" id="coursePerformance">Loading...</div>
+                        <small class="muted">Average rating out of 5</small>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card-custom">
+                        <small class="muted">Response Rate</small>
+                        <div class="kpi" id="responseRate">Loading...</div>
+                        <small class="muted">Based on available backend data</small>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card-custom">
+                        <small class="muted">AI Analyses Saved</small>
+                        <div class="kpi" id="aiIssues">Loading...</div>
+                        <small class="muted">Saved feedback analyses</small>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Recent Reports -->
+            <div class="card-custom mt-4">
+
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <h5 class="title mb-0">Recent Reports</h5>
+                    <button class="btn btn-sm btn-outline-primary" id="refreshReports">
+                        Refresh
+                    </button>
+                </div>
+
+                <div class="table-responsive mt-3">
+                    <table class="table-custom">
+                        <thead>
+                            <tr>
+                                <th>Report</th>
+                                <th>Period</th>
+                                <th>Course</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="reportsTable">
+                            <tr>
+                                <td colspan="4">Loading reports...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p class="muted mt-3 mb-0" id="reportCount">
+                    Loading report count...
+                </p>
+
+            </div>
+
+        </section>
+    </main>
+
+    <script src="../js/app.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+    </script>
+
+    <script>
+        const API_BASE = "http://localhost:5000/api";
+
+        let reportRows = [];
+
+        document.addEventListener("DOMContentLoaded", loadReports);
+
+        function escapeHTML(value) {
+            return String(value ?? "").replace(/[&<>"']/g, char => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;"
+            })[char]);
+        }
+
+        function getToken() {
+            return localStorage.getItem("token");
+        }
+
+        function showMessage(message, type = "info") {
+            const element = document.getElementById("pageMessage");
+            element.className = `alert alert-${type}`;
+            element.textContent = message;
+            element.classList.remove("d-none");
+        }
+
+        function hideMessage() {
+            document.getElementById("pageMessage").classList.add("d-none");
+        }
+
+        async function apiGet(endpoint) {
+            const token = getToken();
+
+            if (!token) {
+                throw new Error("Login required. Please log in again.");
+            }
+
+            const response = await fetch(`${API_BASE}${endpoint}`, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            });
+
+            let result;
+
+            try {
+                result = await response.json();
+            } catch {
+                throw new Error("Server returned an invalid response.");
+            }
+
+            if (!response.ok || result.success === false) {
+                throw new Error(
+                    result.message || `Request failed (${response.status}).`
+                );
+            }
+
+            return result;
+        }
+
+        function getNumber(object, keys) {
+            for (const key of keys) {
+                const value = object?.[key];
+
+                if (value !== undefined && value !== null && value !== "") {
+                    const number = Number(
+                        String(value).replace("%", "").trim()
+                    );
+
+                    if (Number.isFinite(number)) {
+                        return number;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        function formatDate(value) {
+            if (!value) return "Date unavailable";
+
+            const date = new Date(value);
+
+            return Number.isNaN(date.getTime())
+                ? String(value)
+                : date.toLocaleDateString();
+        }
+
+        function parseResult(value) {
+            if (typeof value === "string") {
+                try {
+                    return JSON.parse(value);
+                } catch {
+                    return { summary: value };
+                }
+            }
+
+            return value || {};
+        }
+
+        function getAnalysisSummary(result) {
+            const data = parseResult(result);
+
+            const summary =
+                data.summary ??
+                data.aiSummary ??
+                data.ai_summary ??
+                data.analysis?.summary ??
+                data.sentiment?.summary ??
+                data.overallSummary ??
+                data.overall_summary;
+
+            if (typeof summary === "string" && summary.trim()) {
+                return summary;
+            }
+
+            if (typeof data === "string" && data.trim()) {
+                return data;
+            }
+
+            return "No summary available in this saved analysis.";
+        }
+
+        function extractAnalyses(data) {
+            const possibleArrays = [
+                data.aiAnalyses,
+                data.ai_analyses,
+                data.analyses,
+                data.rows,
+                data.reports
+            ];
+
+            return possibleArrays.find(Array.isArray) || [];
+        }
+
+        function extractCourses(data) {
+            const possibleArrays = [
+                data.assignedCourses,
+                data.assigned_courses,
+                data.courses
+            ];
+
+            return possibleArrays.find(Array.isArray) || [];
+        }
+
+        function updatePerformance(data) {
+            const summary = data.summary || data.statistics || data;
+
+            let average = getNumber(summary, [
+                "averageRating",
+                "average_rating",
+                "avgRating",
+                "avg_rating",
+                "coursePerformance",
+                "course_performance"
+            ]);
+
+            if (average === null) {
+                const ratings = data.ratingsBySection ||
+                    data.ratings_by_section || {};
+
+                const ratingValues = Object.values(ratings)
+                    .map(item => {
+                        if (typeof item === "number" || typeof item === "string") {
+                            return Number(item);
+                        }
+
+                        return getNumber(item, [
+                            "averageRating",
+                            "average_rating",
+                            "average",
+                            "avg"
+                        ]);
+                    })
+                    .filter(value =>
+                        Number.isFinite(value) && value >= 0 && value <= 5
+                    );
+
+                if (ratingValues.length) {
+                    average = ratingValues.reduce((a, b) => a + b, 0)
+                        / ratingValues.length;
+                }
+            }
+
+            document.getElementById("coursePerformance").textContent =
+                average === null ? "N/A" : `${average.toFixed(2)} / 5`;
+
+            const responseRate = getNumber(summary, [
+                "responseRate",
+                "response_rate",
+                "feedbackResponseRate",
+                "feedback_response_rate"
+            ]);
+
+            document.getElementById("responseRate").textContent =
+                responseRate === null ? "N/A" : `${responseRate}%`;
+        }
+
+        async function loadReports() {
+            const table = document.getElementById("reportsTable");
+            const count = document.getElementById("reportCount");
+
+            table.innerHTML = `
+                <tr>
+                    <td colspan="4">Loading reports...</td>
+                </tr>
+            `;
+
+            hideMessage();
+
+            try {
+
+                const [summaryResult, analysesResult] = await Promise.all([
+                    apiGet("/analytics/admin-summary"),
+                    apiGet("/ai-analyses")
+                ]);
+
+                const data = summaryResult.data || {};
+                updatePerformance(data);
+
+                const courses = extractCourses(data);
+
+                const analyses = Array.isArray(analysesResult.data)
+                    ? analysesResult.data
+                    : Array.isArray(analysesResult.data?.rows)
+                        ? analysesResult.data.rows
+                        : Array.isArray(analysesResult.data?.analyses)
+                            ? analysesResult.data.analyses
+                            : [];
+
+                const courseNames = courses
+                    .map(course =>
+                        course.courseName ||
+                        course.course_name ||
+                        course.name
+                    )
+                    .filter(Boolean);
+
+                const courseName = courseNames.length
+                    ? [...new Set(courseNames)].join(", ")
+                    : "Assigned courses";
+
+                reportRows = analyses
+                    .filter(item =>
+                        !item.analysis_type ||
+                        item.analysis_type === "feedback_analysis"
+                    )
+                    .sort((a, b) =>
+                        Number(b.id || 0) - Number(a.id || 0)
+                    )
+                    .map(item => ({
+                        id: item.id,
+                        title: `Feedback Analysis #${item.id}`,
+                        period: formatDate(item.created_at),
+                        course: item.course_name ||
+                            item.courseName ||
+                            courseName,
+                        summary: getAnalysisSummary(item.result)
+                    }));
+
+                document.getElementById("aiIssues").textContent =
+                    reportRows.length;
+
+                if (!reportRows.length) {
+                    table.innerHTML = `
+                        <tr>
+                            <td colspan="4">
+                                No saved AI analysis reports were returned
+                                by the dashboard API.
+                            </td>
+                        </tr>
+                    `;
+
+                    count.textContent = "0 reports available.";
+                    return;
+                }
+
+                table.innerHTML = reportRows.map((report, index) => `
+                    <tr>
+                        <td>${escapeHTML(report.title)}</td>
+                        <td>${escapeHTML(report.period)}</td>
+                        <td>${escapeHTML(report.course)}</td>
+                        <td>
+                            <button
+                                class="btn btn-sm btn-outline-primary"
+                                data-report-index="${index}">
+                                View
+                            </button>
+                        </td>
+                    </tr>
+                `).join("");
+
+                count.textContent =
+                    `${reportRows.length} saved report(s) available.`;
+
+            } catch (error) {
+                reportRows = [];
+
+                document.getElementById("coursePerformance").textContent = "N/A";
+                document.getElementById("responseRate").textContent = "N/A";
+                document.getElementById("aiIssues").textContent = "N/A";
+
+                table.innerHTML = `
+                    <tr>
+                        <td colspan="4">
+                            ${escapeHTML(error.message)}
+                        </td>
+                    </tr>
+                `;
+
+                count.textContent = "Reports could not be loaded.";
+                showMessage(error.message, "warning");
+            }
+        }
+
+        document.getElementById("refreshReports")
+            .addEventListener("click", loadReports);
+
+        document.getElementById("reportsTable")
+            .addEventListener("click", event => {
+                const button = event.target.closest("[data-report-index]");
+
+                if (!button) return;
+
+                const report = reportRows[
+                    Number(button.dataset.reportIndex)
+                ];
+
+                if (!report) return;
+
+                const modal = document.getElementById("reportModal");
+                document.getElementById("modalReportTitle").textContent =
+                    report.title;
+                document.getElementById("modalReportDate").textContent =
+                    report.period;
+                document.getElementById("modalReportCourse").textContent =
+                    report.course;
+                document.getElementById("modalReportSummary").textContent =
+                    report.summary;
+
+                bootstrapModal.show();
+            });
+
+        document.getElementById("exportReport")
+            .addEventListener("click", () => {
+                if (!reportRows.length) {
+                    showMessage(
+                        "No saved reports available to export.",
+                        "warning"
+                    );
+                    return;
+                }
+
+                const escapeCSV = value =>
+                    `"${String(value ?? "").replace(/"/g, '""')}"`;
+
+                const rows = [
+                    ["Report ID", "Report", "Date", "Course", "AI Summary"],
+                    ...reportRows.map(report => [
+                        report.id,
+                        report.title,
+                        report.period,
+                        report.course,
+                        report.summary
+                    ])
+                ];
+
+                const csv = rows
+                    .map(row => row.map(escapeCSV).join(","))
+                    .join("\r\n");
+
+                const blob = new Blob(["\uFEFF" + csv], {
+                    type: "text/csv;charset=utf-8;"
+                });
+
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+
+                link.href = url;
+                link.download = "feedback-reports.csv";
+                link.click();
+
+                URL.revokeObjectURL(url);
+            });
+
+        // Report details modal
+        const modalElement = document.createElement("div");
+        modalElement.className = "modal fade";
+        modalElement.id = "reportModal";
+        modalElement.tabIndex = -1;
+
+        modalElement.innerHTML = `
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalReportTitle">
+                            Feedback Report
+                        </h5>
+                        <button type="button" class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <p><strong>Date:</strong>
+                            <span id="modalReportDate"></span>
+                        </p>
+                        <p><strong>Course:</strong>
+                            <span id="modalReportCourse"></span>
+                        </p>
+                        <hr>
+                        <h6>AI Summary</h6>
+                        <p id="modalReportSummary"
+                            style="white-space: pre-wrap;"></p>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary"
+                            data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modalElement);
+
+        const bootstrapModal = new bootstrap.Modal(modalElement);
+    </script>
+
+</body>
+
+</html>

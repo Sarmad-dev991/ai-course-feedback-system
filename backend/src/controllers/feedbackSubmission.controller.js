@@ -6,8 +6,8 @@ const getFeedbackSubmissions = (req, res) => {
         SELECT
             fs.id,
             fs.form_id,
-            f.title AS form,
             fs.student_id,
+            f.title AS form,
             u.name AS student_name,
             fs.submitted_at,
             fs.status
@@ -20,6 +20,27 @@ const getFeedbackSubmissions = (req, res) => {
             ON s.user_id = u.id
         ORDER BY fs.id DESC
     `;
+
+    const submission = results[0];
+
+    if (req.user?.role === "Student") {
+        const loggedInStudentId = Number(req.user.studentId);
+
+        if (
+            !loggedInStudentId ||
+            Number(submission.student_id) !== loggedInStudentId
+        ) {
+            return res.status(403).json({
+                success: false,
+                message: "You are not allowed to view this feedback submission"
+            });
+        }
+    } else if (!["Admin", "Instructor"].includes(req.user?.role)) {
+        return res.status(403).json({
+            success: false,
+            message: "You are not allowed to view this feedback submission"
+        });
+    }
 
     db.query(sql, (err, results) => {
         if (err) {
@@ -400,8 +421,37 @@ const deleteFeedbackSubmission = (req, res) => {
 
 
 const completeFeedbackSubmission = async (req, res) => {
-    const { form_id, student_id, ratings, complaint, suggestion } = req.body;
+    const { form_id, ratings, complaint, suggestion } = req.body;
     const connection = db.promise();
+
+    let student_id;
+
+    if (req.user?.role === "Student") {
+        // Student ID token se aayegi, request body se nahi
+        student_id = Number(req.user.studentId);
+
+        if (!student_id || !Number.isInteger(student_id)) {
+            return res.status(403).json({
+                success: false,
+                message: "Student profile not found in your login session. Please log in again."
+            });
+        }
+    } else if (req.user?.role === "Admin") {
+        // Admin ke liye supplied student ID allow hai
+        student_id = Number(req.body.student_id);
+
+        if (!student_id || !Number.isInteger(student_id)) {
+            return res.status(400).json({
+                success: false,
+                message: "A valid student_id is required"
+            });
+        }
+    } else {
+        return res.status(403).json({
+            success: false,
+            message: "You are not allowed to submit feedback"
+        });
+    }
 
     if (!form_id || !student_id || !Array.isArray(ratings)) {
         return res.status(400).json({

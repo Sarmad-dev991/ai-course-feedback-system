@@ -1,0 +1,628 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Insights</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+
+    <style>
+        .insight-message {
+            color: #64748b;
+            padding: 10px 0;
+            margin-bottom: 0;
+        }
+
+        .chart {
+            min-height: 190px;
+            display: flex;
+            align-items: flex-end;
+            gap: 16px;
+            padding: 20px 8px 0;
+            overflow-x: auto;
+        }
+
+        .trend-item {
+            flex: 1;
+            min-width: 54px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .trend-bar {
+            width: 100%;
+            max-width: 46px;
+            min-height: 8px;
+            background: #1769e0;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .trend-label {
+            color: #64748b;
+            font-size: 12px;
+            text-align: center;
+            overflow-wrap: anywhere;
+        }
+
+        .topic-item {
+            margin-bottom: 16px;
+        }
+
+        .topic-item .progress {
+            height: 8px;
+        }
+
+        #loadStatus {
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
+
+        #downloadReport:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="logo">CS</div>
+            <div>
+                CS TECHNOLOGIES
+                <small>RAWALPINDI</small>
+            </div>
+        </div>
+
+        <a href="admin-dashboard.html" class="nav-link-custom">
+            Dashboard
+        </a>
+        <a href="admin-ai-insights.html" class="nav-link-custom active">
+            AI Insights
+        </a>
+        <a href="admin-reports.html" class="nav-link-custom">Reports</a>
+
+        <div class="logout">
+            <a href="login.html" class="nav-link-custom">Logout</a>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div class="brand">
+                <div class="logo">CS</div>
+                <div>
+                    CS TECHNOLOGIES
+                    <small>RAWALPINDI</small>
+                </div>
+            </div>
+            <b id="instructorName">Administrator</b>
+        </header>
+
+        <section class="content">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+                <div>
+                    <small class="muted">AI Insights</small>
+                    <h2 class="title" id="courseTitle">AI Feedback Insights</h2>
+                </div>
+
+                <button id="downloadReport" class="btn btn-navy" type="button" disabled>
+                    Download Report
+                </button>
+            </div>
+
+            <p id="loadStatus" class="muted">Loading saved AI insights...</p>
+
+            <div class="row g-4">
+                <div class="col-lg-7">
+                    <div class="card-custom">
+                        <h5 class="title">Sentiment Trend</h5>
+                        <div class="chart" id="sentimentTrend">
+                            <p class="insight-message">Loading sentiment data...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="card-custom">
+                        <h5 class="title">Top Topics / Issues</h5>
+                        <div id="topTopics">
+                            <p class="insight-message">Loading topics...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="card-custom">
+                        <h5 class="title">AI Generated Summary</h5>
+                        <p class="muted" id="aiSummary">Loading saved summary...</p>
+                        <span class="badge-soft badge-orange">AI-generated</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="card-custom">
+                        <h5 class="title">Top Suggestions</h5>
+                        <ul id="topSuggestions">
+                            <li class="muted">Loading suggestions...</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="../js/app.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+            const API_URL = "http://localhost:5000/api/ai-analyses";
+            const token = localStorage.getItem("token");
+
+            const status = document.getElementById("loadStatus");
+            const summaryElement = document.getElementById("aiSummary");
+            const topicsElement = document.getElementById("topTopics");
+            const suggestionsElement = document.getElementById("topSuggestions");
+            const trendElement = document.getElementById("sentimentTrend");
+            const downloadButton = document.getElementById("downloadReport");
+
+            let reportData = null;
+
+            if (!token) {
+                status.textContent = "Please log in to view AI insights.";
+                summaryElement.textContent = "Login is required.";
+                showMessage(topicsElement, "Login is required.");
+                showMessage(trendElement, "Login is required.");
+                renderList(suggestionsElement, [], "Login is required.");
+                return;
+            }
+
+            function showMessage(container, message) {
+                if (!container) return;
+
+                container.replaceChildren();
+
+                const element = document.createElement("p");
+                element.className = "insight-message";
+                element.textContent = message;
+
+                container.appendChild(element);
+            }
+
+            function toArray(value) {
+                if (Array.isArray(value)) return value;
+                if (value === null || value === undefined) return [];
+                return [value];
+            }
+
+            function getText(value) {
+                if (typeof value === "string" || typeof value === "number") {
+                    return String(value);
+                }
+
+                if (value && typeof value === "object") {
+                    return value.topic ??
+                        value.issue ??
+                        value.suggestion ??
+                        value.name ??
+                        value.label ??
+                        value.text ??
+                        "";
+                }
+
+                return "";
+            }
+
+            function parseJSON(value) {
+                if (typeof value !== "string") return value;
+
+                try {
+                    return JSON.parse(value);
+                } catch {
+                    return null;
+                }
+            }
+
+            function getAnalysis(record) {
+                let result = record.result ??
+                    record.analysis ??
+                    record.analysis_result ??
+                    record.analysisResult;
+
+                result = parseJSON(result);
+
+                if (!result || typeof result !== "object") {
+                    return {};
+                }
+
+                // Handle APIs that return the analysis inside another object.
+                if (result.analysis && typeof result.analysis === "object" &&
+                    !result.summary && !result.suggestions) {
+                    result = result.analysis;
+                } else if (typeof result.analysis === "string" &&
+                    !result.summary && !result.suggestions) {
+                    result = parseJSON(result.analysis) || {};
+                }
+
+                return result;
+            }
+
+            function getRecordId(record) {
+                const id = Number(record.id);
+                return Number.isFinite(id) ? id : 0;
+            }
+
+            function getSubmissionId(record) {
+                return record.submission_id ??
+                    record.submissionId ??
+                    null;
+            }
+
+            function renderList(list, values, emptyMessage) {
+                list.replaceChildren();
+
+                const items = toArray(values)
+                    .map(getText)
+                    .map(value => value.trim())
+                    .filter(Boolean);
+
+                if (!items.length) {
+                    const li = document.createElement("li");
+                    li.className = "muted";
+                    li.textContent = emptyMessage;
+                    list.appendChild(li);
+                    return;
+                }
+
+                items.forEach(value => {
+                    const li = document.createElement("li");
+                    li.textContent = value;
+                    list.appendChild(li);
+                });
+            }
+
+            function normalizeTopic(item) {
+                if (typeof item === "string") {
+                    return item.trim();
+                }
+
+                return getText(item).trim();
+            }
+
+            function renderTopics(uniqueAnalyses) {
+                topicsElement.replaceChildren();
+
+                // Count each topic at most once per unique submission.
+                const counts = new Map();
+                let submissionCount = 0;
+
+                uniqueAnalyses.forEach(entry => {
+                    const analysis = entry.analysis;
+                    const topicValues = [
+                        ...toArray(analysis.topics),
+                        ...toArray(analysis.issues)
+                    ];
+
+                    const uniqueTopics = new Set(
+                        topicValues.map(normalizeTopic).filter(Boolean)
+                    );
+
+                    if (!getSubmissionId(entry.record)) return;
+
+                    submissionCount++;
+
+                    uniqueTopics.forEach(topic => {
+                        counts.set(topic, (counts.get(topic) || 0) + 1);
+                    });
+                });
+
+                const rankedTopics = [...counts.entries()]
+                    .sort((a, b) => b[1] - a[1]);
+
+                if (!rankedTopics.length || !submissionCount) {
+                    showMessage(
+                        topicsElement,
+                        "No saved topics or issues are available in the feedback analyses."
+                    );
+                    return;
+                }
+
+                rankedTopics.slice(0, 5).forEach(([topic, count]) => {
+                    const percentage = Math.round(
+                        (count / submissionCount) * 100
+                    );
+
+                    const wrapper = document.createElement("div");
+                    wrapper.className = "topic-item";
+
+                    const heading = document.createElement("p");
+                    heading.className = "mb-2";
+
+                    const label = document.createElement("span");
+                    label.textContent = topic;
+
+                    const value = document.createElement("b");
+                    value.className = "float-end";
+                    value.textContent = `${percentage}%`;
+
+                    heading.append(label, value);
+
+                    const progress = document.createElement("div");
+                    progress.className = "progress";
+
+                    const bar = document.createElement("div");
+                    bar.className = "progress-bar";
+                    bar.style.width = `${percentage}%`;
+                    bar.setAttribute("role", "progressbar");
+                    bar.setAttribute("aria-valuenow", String(percentage));
+                    bar.setAttribute("aria-valuemin", "0");
+                    bar.setAttribute("aria-valuemax", "100");
+
+                    progress.appendChild(bar);
+                    wrapper.append(heading, progress);
+                    topicsElement.appendChild(wrapper);
+                });
+            }
+
+            function getSentiment(analysis) {
+                const value = analysis.sentiment ??
+                    analysis.sentiment_label ??
+                    analysis.sentimentLabel;
+
+                return typeof value === "string" ? value.trim() : "";
+            }
+
+            function renderTrend(uniqueAnalyses) {
+                trendElement.replaceChildren();
+
+                const records = uniqueAnalyses
+                    .filter(entry => getSubmissionId(entry.record))
+                    .filter(entry => getSentiment(entry.analysis));
+
+                if (records.length < 2) {
+                    showMessage(
+                        trendElement,
+                        "Not enough unique feedback submissions to show a sentiment trend. More submitted feedback is needed."
+                    );
+                    return;
+                }
+
+                records.slice(-8).forEach((entry, index) => {
+                    const sentiment = getSentiment(entry.analysis);
+                    const normalized = sentiment.toLowerCase();
+
+                    // Bar height is a visual sentiment category, not a fake percentage.
+                    const height =
+                        normalized === "positive" ? 100 :
+                            normalized === "mixed" ? 65 :
+                                normalized === "negative" ? 35 :
+                                    normalized === "neutral" ? 55 : 50;
+
+                    const item = document.createElement("div");
+                    item.className = "trend-item";
+
+                    const bar = document.createElement("div");
+                    bar.className = "trend-bar";
+                    bar.style.height = `${height}px`;
+                    bar.title = sentiment;
+
+                    const label = document.createElement("span");
+                    label.className = "trend-label";
+                    label.textContent = `Feedback ${index + 1}`;
+
+                    const sentimentLabel = document.createElement("span");
+                    sentimentLabel.className = "trend-label";
+                    sentimentLabel.textContent = sentiment;
+
+                    item.append(bar, label, sentimentLabel);
+                    trendElement.appendChild(item);
+                });
+            }
+
+            function downloadReport() {
+                if (!reportData) return;
+
+                const lines = [
+                    "AI COURSE FEEDBACK SYSTEM",
+                    "AI INSIGHTS REPORT",
+                    "",
+                    `Analysis ID: ${reportData.record.id ?? "N/A"}`,
+                    `Submission ID: ${getSubmissionId(reportData.record) ?? "N/A"}`,
+                    `Created At: ${reportData.record.created_at ?? "N/A"}`,
+                    `Sentiment: ${getSentiment(reportData.analysis) || "N/A"}`,
+                    "",
+                    "SUMMARY",
+                    getText(reportData.analysis.summary) || "No saved summary available.",
+                    "",
+                    "TOPICS / ISSUES",
+                    ...toArray(reportData.analysis.topics)
+                        .concat(toArray(reportData.analysis.issues))
+                        .map(getText)
+                        .filter(Boolean),
+                    "",
+                    "SUGGESTIONS",
+                    ...toArray(reportData.analysis.suggestions)
+                        .map(getText)
+                        .filter(Boolean)
+                ];
+
+                const blob = new Blob(
+                    [lines.join("\n")],
+                    { type: "text/plain;charset=utf-8" }
+                );
+
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+
+                link.href = url;
+                link.download = "ai-insights-report.txt";
+                link.click();
+
+                URL.revokeObjectURL(url);
+            }
+
+            downloadButton.addEventListener("click", downloadReport);
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                const payload = await response.json();
+
+                if (!response.ok || payload.success === false) {
+                    throw new Error(
+                        payload.message || "Could not load saved AI analyses."
+                    );
+                }
+
+                const records = Array.isArray(payload.data)
+                    ? payload.data
+                    : Array.isArray(payload.data?.rows)
+                        ? payload.data.rows
+                        : Array.isArray(payload.data?.analyses)
+                            ? payload.data.analyses
+                            : [];
+
+                const analyses = records
+                    .filter(record =>
+                        !record.analysis_type ||
+                        record.analysis_type === "feedback_analysis"
+                    )
+                    .map(record => ({
+                        record,
+                        analysis: getAnalysis(record)
+                    }))
+                    .sort((a, b) =>
+                        getRecordId(b.record) - getRecordId(a.record)
+                    );
+
+                if (!analyses.length) {
+                    status.textContent = "No saved AI analyses were found.";
+                    summaryElement.textContent =
+                        "No saved AI summary is available.";
+                    renderList(
+                        suggestionsElement,
+                        [],
+                        "No saved suggestions are available."
+                    );
+                    renderTopics([]);
+                    renderTrend([]);
+                    return;
+                }
+
+                // Latest saved analysis is used for summary and suggestions.
+                reportData = analyses[0];
+                const latest = reportData.analysis;
+
+                summaryElement.textContent =
+                    getText(latest.summary) ||
+                    "No summary is available in the saved analysis.";
+
+                renderList(
+                    suggestionsElement,
+                    latest.suggestions ?? latest.topSuggestions,
+                    "No saved suggestions are available in this analysis."
+                );
+
+                // Keep only the newest analysis for each submission so repeated
+                // analysis runs on the same feedback do not inflate counts.
+                const bySubmission = new Map();
+
+                analyses.forEach(entry => {
+                    const submissionId = getSubmissionId(entry.record);
+
+                    if (submissionId === null || submissionId === undefined) {
+                        return;
+                    }
+
+                    const key = String(submissionId);
+
+                    if (!bySubmission.has(key)) {
+                        bySubmission.set(key, entry);
+                    }
+                });
+
+                const uniqueAnalyses = [...bySubmission.values()]
+                    .sort((a, b) =>
+                        getRecordId(a.record) - getRecordId(b.record)
+                    );
+
+                renderTopics(uniqueAnalyses);
+                renderTrend(uniqueAnalyses);
+
+                // Admin page: do not call the instructor-only dashboard API.
+                document.getElementById("instructorName").textContent = "Administrator";
+                document.getElementById("courseTitle").textContent = "AI Feedback Insights";
+
+                if (instructorName) {
+                    document.getElementById("instructorName").textContent =
+                        getText(instructorName);
+                }
+
+                const courseName =
+                    latest.course_name ??
+                    latest.courseName ??
+                    latest.course_title ??
+                    latest.courseTitle;
+
+                const batchName =
+                    latest.batch_name ??
+                    latest.batchName;
+
+                const titleParts = [getText(courseName), getText(batchName)]
+                    .filter(Boolean);
+
+                if (titleParts.length) {
+                    document.getElementById("courseTitle").textContent =
+                        titleParts.join(" â€“ ");
+                }
+
+                status.textContent =
+                    `Loaded saved analysis #${reportData.record.id ?? ""}.`;
+
+                downloadButton.disabled = false;
+
+                console.log("AI Insights loaded:", {
+                    latestAnalysisId: reportData.record.id,
+                    uniqueSubmissionCount: uniqueAnalyses.length,
+                    latestAnalysis: latest
+                });
+
+            } catch (error) {
+                console.error("AI Insights API error:", error);
+                status.textContent = error.message;
+
+                summaryElement.textContent =
+                    "Could not load the saved AI summary.";
+
+                showMessage(
+                    topicsElement,
+                    "Could not load topics. Check the backend connection."
+                );
+
+                showMessage(
+                    trendElement,
+                    "Could not load sentiment data."
+                );
+
+                renderList(
+                    suggestionsElement,
+                    [],
+                    "Could not load suggestions."
+                );
+            }
+        });
+    </script>
+</body>
+
+</html>

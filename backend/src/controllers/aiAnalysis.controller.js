@@ -1,89 +1,48 @@
-const db = require("../config/db");
+﻿const db = require("../config/db");
 const { analyzeFeedbackText } = require("../services/aiAnalysis.service");
 
-// GET ALL AI ANALYSES
 
+ // GET ALL AI ANALYSES
 const getAIAnalyses = (req, res) => {
-  const userId = Number(req.user?.userId);
-  const role = String(req.user?.role || "").toLowerCase();
-
-  // Admin can view all saved AI analyses.
-  if (role === "admin") {
     const sql = `
-      SELECT
-        aa.id,
-        aa.submission_id,
-        aa.analysis_type,
-        aa.result,
-        aa.created_at
-      FROM ai_analyses aa
-      ORDER BY aa.id DESC
+        SELECT
+            aa.id,
+            aa.submission_id,
+            aa.analysis_type,
+            aa.result,
+            aa.created_at,
+            c.title AS course_name,
+            b.name AS batch_name
+        FROM ai_analyses aa
+        LEFT JOIN feedback_submissions fs
+            ON fs.id = aa.submission_id
+        LEFT JOIN feedback_forms ff
+            ON ff.id = fs.form_id
+        LEFT JOIN batches b
+            ON b.id = ff.batch_id
+        LEFT JOIN courses c
+            ON c.id = COALESCE(ff.course_id, b.course_id)
+        ORDER BY aa.id DESC
     `;
 
-    return db.query(sql, (error, rows) => {
-      if (error) {
-        console.error("Get AI analyses error:", error);
-        return res.status(500).json({
-          success: false,
-          message: "Failed to load AI analyses."
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error("Fetch AI analyses error:", err);
+
+            return res.status(500).json({
+                success: false,
+                message: "Failed to fetch AI analyses"
+            });
+        }
+
+        res.json({
+            success: true,
+            count: results.length,
+            data: results
         });
-      }
-
-      return res.status(200).json({
-        success: true,
-        count: rows.length,
-        data: rows
-      });
     });
-  }
-
-  // Only an authenticated instructor can view instructor-specific analyses.
-  if (role !== "instructor" || !Number.isInteger(userId) || userId <= 0) {
-    return res.status(403).json({
-      success: false,
-      message: "You are not authorized to view these AI analyses."
-    });
-  }
-
-  // Get analyses linked to this instructor's assigned batches.
-  const sql = `
-    SELECT DISTINCT
-      aa.id,
-      aa.submission_id,
-      aa.analysis_type,
-      aa.result,
-      aa.created_at
-    FROM instructors i
-    INNER JOIN batch_instructors bi
-      ON bi.instructor_id = i.id
-    INNER JOIN batches b
-      ON b.id = bi.batch_id
-    INNER JOIN feedback_forms ff
-      ON ff.batch_id = b.id
-    INNER JOIN feedback_submissions fs
-      ON fs.form_id = ff.id
-    INNER JOIN ai_analyses aa
-      ON aa.submission_id = fs.id
-    WHERE i.user_id = ?
-    ORDER BY aa.id DESC
-  `;
-
-  db.query(sql, [userId], (error, rows) => {
-    if (error) {
-      console.error("Get instructor AI analyses error:", error);
-      return res.status(500).json({
-        success: false,
-        message: "Failed to load instructor AI analyses."
-      });
-    }
-
-    return res.status(200).json({
-      success: true,
-      count: rows.length,
-      data: rows
-    });
-  });
 };
+
 
 
 
@@ -416,3 +375,6 @@ module.exports = {
     deleteAIAnalysis,
     analyzeSubmission
 };
+
+
+

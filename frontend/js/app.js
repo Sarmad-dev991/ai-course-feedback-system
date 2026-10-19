@@ -459,44 +459,44 @@ if (loginForm) {
     // 8. REVIEW & SUBMIT
     // =====================================================
 
-    const submitFeedback =
-        document.getElementById("submitFeedback");
+    // const submitFeedback =
+    //     document.getElementById("submitFeedback");
 
-    const confirmCheckbox =
-        document.getElementById("confirm");
-
-
-    if (submitFeedback && confirmCheckbox) {
-
-        submitFeedback.addEventListener("click", function () {
+    // const confirmCheckbox =
+    //     document.getElementById("confirm");
 
 
-            // Confirmation check
-            if (!confirmCheckbox.checked) {
+    // if (submitFeedback && confirmCheckbox) {
 
-                alert(
-                    "Click ok if you are sure that provided information is correct."
-                );
-
-                return;
-
-            }
+    //     submitFeedback.addEventListener("click", function () {
 
 
-            // Temporary frontend save
-            localStorage.setItem(
-                "feedbackSubmitted",
-                "true"
-            );
+    //         // Confirmation check
+    //         if (!confirmCheckbox.checked) {
+
+    //             alert(
+    //                 "Click ok if you are sure that provided information is correct."
+    //             );
+
+    //             return;
+
+    //         }
 
 
-            // Go to confirmation page
-            window.location.href =
-                "submission-confirmation.html";
+    //         // Temporary frontend save
+    //         localStorage.setItem(
+    //             "feedbackSubmitted",
+    //             "true"
+    //         );
 
-        });
 
-    }
+    //         // Go to confirmation page
+    //         window.location.href =
+    //             "submission-confirmation.html";
+
+    //     });
+
+    // }
 
 
     // =====================================================

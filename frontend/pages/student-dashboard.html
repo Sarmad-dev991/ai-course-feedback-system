@@ -99,9 +99,7 @@
 
                 </div>
 
-                <button
-                    class="btn btn-outline-primary"
-                    data-go="profile-settings.html">
+                <button class="btn btn-outline-primary" data-go="profile-settings.html">
 
                     My Profile
 
@@ -117,9 +115,7 @@
 
 
             <!-- ERROR -->
-            <div
-                id="dashboardError"
-                class="alert alert-danger d-none">
+            <div id="dashboardError" class="alert alert-danger d-none">
             </div>
 
 
@@ -135,9 +131,7 @@
                             Pending Evaluations
                         </small>
 
-                        <div
-                            class="kpi"
-                            id="pendingCount">
+                        <div class="kpi" id="pendingCount">
                             0
                         </div>
 
@@ -159,9 +153,7 @@
                             Submitted Evaluations
                         </small>
 
-                        <div
-                            class="kpi"
-                            id="submittedCount">
+                        <div class="kpi" id="submittedCount">
                             0
                         </div>
 
@@ -183,9 +175,7 @@
                             Total Courses
                         </small>
 
-                        <div
-                            class="kpi"
-                            id="totalCourses">
+                        <div class="kpi" id="totalCourses">
                             0
                         </div>
 
@@ -207,9 +197,7 @@
                             Completion Rate
                         </small>
 
-                        <div
-                            class="kpi"
-                            id="completionRate">
+                        <div class="kpi" id="completionRate">
                             0%
                         </div>
 
@@ -303,289 +291,218 @@
 
 
     <!-- DASHBOARD API -->
-    <script>
-
-        const API_BASE_URL = "http://localhost:5000/api";
-
-
-        document.addEventListener("DOMContentLoaded", async () => {
-
-            const token = localStorage.getItem("token");
-            const storedUser = localStorage.getItem("user");
-
-            const loadingMessage =
-                document.getElementById("loadingMessage");
-
-            const errorMessage =
-                document.getElementById("dashboardError");
-
-
-            /*
-             * User must be logged in
-             */
-
-            if (!token) {
-
-                window.location.href = "login.html";
-                return;
-
-            }
-
-
-            /*
-             * Get logged-in user
-             */
-
-            let user = null;
-
-            try {
-
-                user = storedUser
-                    ? JSON.parse(storedUser)
-                    : null;
-
-            } catch (error) {
-
-                console.error("Invalid user data");
-
-            }
-
-
-            /*
-             * Display student name
-             */
-
-            if (user && user.name) {
-
-                document.getElementById("studentName").textContent =
-                    user.name;
-
-                document.getElementById("welcomeMessage").textContent =
-                    `Welcome, ${user.name} 👋`;
-
-            }
-
-
-            /*
-             * Get courses
-             */
-
-            try {
-
-                const response = await fetch(
-                    `${API_BASE_URL}/courses`,
-                    {
-                        method: "GET",
-
-                        headers: {
-                            "Authorization": `Bearer ${token}`,
-                            "Content-Type": "application/json"
-                        }
-                    }
-                );
-
-
-                if (!response.ok) {
-
-                    if (response.status === 401) {
-
-                        localStorage.removeItem("token");
-                        localStorage.removeItem("user");
-
-                        window.location.href = "login.html";
-                        return;
-
-                    }
-
-                    throw new Error(
-                        `Course API returned ${response.status}`
-                    );
-
-                }
-
-
-                const result = await response.json();
-
-                console.log("Courses API:", result);
-
-
-                /*
-                 * Handle different possible API response formats
-                 */
-
-                let courses = [];
-
-                if (Array.isArray(result)) {
-
-                    courses = result;
-
-                } else if (Array.isArray(result.data)) {
-
-                    courses = result.data;
-
-                } else if (Array.isArray(result.courses)) {
-
-                    courses = result.courses;
-
-                }
-
-
-                /*
-                 * Display total courses
-                 */
-
-                document.getElementById("totalCourses").textContent =
-                    courses.length;
-
-
-                /*
-                 * Since enrollment/submission information
-                 * is handled separately, keep these values
-                 * safe until those APIs are connected.
-                 */
-
-                document.getElementById("pendingCount").textContent = "0";
-
-                document.getElementById("submittedCount").textContent = "0";
-
-                document.getElementById("completionRate").textContent = "0%";
-
-
-                /*
-                 * Display courses as pending feedback
-                 */
-
-                const pendingContainer =
-                    document.getElementById("pendingEvaluations");
-
-
-                if (courses.length === 0) {
-
-                    pendingContainer.innerHTML = `
-                        <p class="muted mt-3">
-                            No courses available.
-                        </p>
-                    `;
-
-                } else {
-
-                    pendingContainer.innerHTML = "";
-
-                    courses.forEach(course => {
-
-                        const courseName =
-                            course.name ||
-                            course.course_name ||
-                            course.title ||
-                            "Course";
-
-                        const courseId =
-                            course.id ||
-                            course.course_id ||
-                            "";
-
-
-                        pendingContainer.innerHTML += `
-
-                            <div class="border rounded p-3 mt-3">
-
-                                <div class="row align-items-center">
-
-                                    <div class="col-lg-8">
-
-                                        <h6 class="title">
-                                            ${courseName}
-                                        </h6>
-
-                                        <small class="muted">
-                                            Course ID: ${courseId}
-                                        </small>
-
-                                    </div>
-
-
-                                    <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-
-                                        <span class="badge-soft badge-red">
-                                            Feedback Pending
-                                        </span>
-
-                                        <button
-                                            class="btn btn-navy btn-sm mt-2"
-                                            onclick="openFeedback(${courseId})">
-
-                                            Give Feedback →
-
-                                        </button>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        `;
-
-                    });
-
-                }
-
-
-                /*
-                 * Hide loading
-                 */
-
-                loadingMessage.classList.add("d-none");
-
-
-            } catch (error) {
-
-                console.error("Dashboard error:", error);
-
-                loadingMessage.classList.add("d-none");
-
-                errorMessage.textContent =
-                    "Unable to load dashboard data. Please make sure the backend server is running.";
-
-                errorMessage.classList.remove("d-none");
-
-            }
-
-        });
-
-
-        /*
-         * Open feedback
-         */
-
-        function openFeedback(courseId) {
-
-            localStorage.setItem(
-                "selectedCourseId",
-                courseId
-            );
-
-            window.location.href =
-                "course-information.html";
-
+    
+<script>
+    const API_BASE_URL = "http://localhost:5000/api";
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        const token = localStorage.getItem("token");
+        const storedUser = localStorage.getItem("user");
+
+        const loadingMessage = document.getElementById("loadingMessage");
+        const errorMessage = document.getElementById("dashboardError");
+        const pendingContainer = document.getElementById("pendingEvaluations");
+
+        if (!token) {
+            window.location.href = "login.html";
+            return;
         }
 
+        let user = null;
 
-        /*
-         * Logout
-         */
+        try {
+            user = storedUser ? JSON.parse(storedUser) : null;
+        } catch {
+            localStorage.removeItem("user");
+        }
 
-        document
-            .getElementById("logoutBtn")
-            ?.addEventListener("click", () => {
+        if (user?.name) {
+            document.getElementById("studentName").textContent = user.name;
+            document.getElementById("welcomeMessage").textContent =
+                `Welcome, ${user.name} 👋`;
+        }
 
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/students/my-courses`,
+                {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    }
+                }
+            );
+
+            if (response.status === 401) {
                 localStorage.removeItem("token");
                 localStorage.removeItem("user");
-                localStorage.removeItem("selectedCourseId");
+                window.location.href = "login.html";
+                return;
+            }
 
-            });
+            if (!response.ok) {
+                throw new Error(`Courses API returned ${response.status}`);
+            }
 
-    </script>
+            const result = await response.json();
+
+            if (!result.success) {
+                throw new Error(result.message || "Could not load courses.");
+            }
+
+            const courses = Array.isArray(result.data) ? result.data : [];
+
+            // Normalize status values returned by the API.
+            const getStatus = course =>
+                String(course.status || "").trim().toLowerCase();
+
+            const isSubmitted = course =>
+                ["completed", "submitted"].includes(getStatus(course));
+
+            const isPending = course =>
+                ["pending", "incomplete", "not submitted"].includes(getStatus(course));
+
+            const submittedCourses = courses.filter(isSubmitted);
+            const pendingCourses = courses.filter(isPending);
+
+            document.getElementById("totalCourses").textContent = courses.length;
+            document.getElementById("submittedCount").textContent =
+                submittedCourses.length;
+            document.getElementById("pendingCount").textContent =
+                pendingCourses.length;
+
+            const completionRate = courses.length
+                ? Math.round((submittedCourses.length / courses.length) * 100)
+                : 0;
+
+            document.getElementById("completionRate").textContent =
+                `${completionRate}%`;
+
+            // Render only genuinely pending enrolled courses.
+            pendingContainer.replaceChildren();
+
+            if (pendingCourses.length === 0) {
+                pendingContainer.textContent = courses.length
+                    ? "No pending feedback for your enrolled courses."
+                    : "You are not enrolled in any courses yet.";
+            } else {
+                pendingCourses.forEach(course => {
+                    const card = document.createElement("div");
+                    card.className = "border rounded p-3 mt-3";
+
+                    const title = document.createElement("h6");
+                    title.className = "title";
+                    title.textContent = course.course_title || "Course";
+
+                    const courseId = document.createElement("p");
+                    courseId.className = "muted small";
+                    courseId.textContent = `Course ID: ${course.course_id ?? "N/A"}`;
+
+                    const batch = document.createElement("p");
+                    batch.className = "muted small";
+                    batch.textContent = `Batch: ${course.batch_name || "Not assigned"}`;
+
+                    const status = document.createElement("span");
+                    status.className = "badge text-bg-warning";
+                    status.textContent = "Feedback Pending";
+
+                    const button = document.createElement("button");
+                    button.className = "btn btn-navy btn-sm mt-2";
+                    button.textContent = "Give Feedback";
+
+                    button.addEventListener("click", () => {
+                        localStorage.setItem("selectedCourseId", String(course.course_id));
+                        localStorage.setItem("selectedBatchId", String(course.batch_id));
+                        window.location.href =
+                            `course-information.html?courseId=${encodeURIComponent(course.course_id)}&batchId=${encodeURIComponent(course.batch_id)}`;
+                    });
+
+                    card.append(title, courseId, batch, status, button);
+                    pendingContainer.appendChild(card);
+                });
+            }
+
+            // Populate Recently Submitted using only fields actually returned.
+            const tables = document.querySelectorAll("table");
+            const recentTable = Array.from(tables).find(table =>
+                table.innerText.includes("Submitted On") &&
+                table.innerText.includes("Instructor")
+            );
+
+            if (recentTable) {
+                const tbody = recentTable.querySelector("tbody");
+
+                if (tbody) {
+                    tbody.replaceChildren();
+
+                    if (submittedCourses.length === 0) {
+                        const row = document.createElement("tr");
+                        const cell = document.createElement("td");
+                        cell.colSpan = 5;
+                        cell.textContent = "No feedback submissions found.";
+                        row.appendChild(cell);
+                        tbody.appendChild(row);
+                    } else {
+                        submittedCourses.forEach(course => {
+                            const row = document.createElement("tr");
+
+                            const values = [
+                                course.course_title || "Course",
+                                course.batch_name || "—",
+                                course.instructor_name || "—",
+                                course.submitted_at
+                                    ? new Date(course.submitted_at).toLocaleDateString()
+                                    : "—",
+                                course.status || "Submitted"
+                            ];
+
+                            values.forEach(value => {
+                                const cell = document.createElement("td");
+                                cell.textContent = value;
+                                row.appendChild(cell);
+                            });
+
+                            tbody.appendChild(row);
+                        });
+                    }
+                }
+            }
+
+            loadingMessage?.classList.add("d-none");
+            errorMessage?.classList.add("d-none");
+
+        } catch (error) {
+            console.error("Dashboard error:", error);
+
+            loadingMessage?.classList.add("d-none");
+
+            if (errorMessage) {
+                errorMessage.textContent =
+                    "Unable to load dashboard data. Please make sure the backend server is running.";
+                errorMessage.classList.remove("d-none");
+            }
+        }
+    });
+
+    function openFeedback(courseId, batchId) {
+        localStorage.setItem("selectedCourseId", String(courseId));
+
+        if (batchId != null) {
+            localStorage.setItem("selectedBatchId", String(batchId));
+        }
+
+        window.location.href = "course-information.html";
+    }
+
+    document.getElementById("logoutBtn")?.addEventListener("click", () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        localStorage.removeItem("selectedCourseId");
+        localStorage.removeItem("selectedBatchId");
+        localStorage.removeItem("selectedFormId");
+    });
+</script>
 
 </body>
 

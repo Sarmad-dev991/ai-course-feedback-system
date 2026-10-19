@@ -298,107 +298,196 @@ const getCourseAnalytics = (req, res) => {
 // Admin Summary
 // -----------------------------------------
 
-const getAdminSummary = (req, res) => {
-
-    if (req.user.role !== "Admin") {
-
-        return res.status(403).json({
-            success: false,
-            message: "Admin access required"
-        });
-
-    }
-
-
-    const enrollments =
-        getEnrollmentData();
-
-    const forms =
-        getFeedbackFormsData();
-
-    const responses =
-        getFeedbackResponsesData();
-
-
-    const totalStudents =
-        new Set(
-            enrollments.map(
-                enrollment =>
-                    enrollment.studentEmail
-            )
-        ).size;
-
-
-    const totalCourses =
-        new Set(
-            enrollments.map(
-                enrollment =>
-                    enrollment.courseId
-            )
-        ).size;
-
-
-    const activeBatches =
-        new Set(
-            enrollments
-                .filter(
-                    enrollment =>
-                        enrollment.status === "Active"
-                )
-                .map(
-                    enrollment =>
-                        enrollment.batchId
-                )
-        ).size;
-
-
-    const totalResponses =
-        responses.length;
-
-
-    const totalEligible =
-        enrollments.filter(
-            enrollment =>
-                enrollment.status === "Active"
-        ).length;
-
-
-    const responseRate =
-        totalEligible === 0
-            ? 0
-            : Number(
-                (
-                    (totalResponses /
-                        totalEligible) * 100
-                ).toFixed(2)
-            );
-
-
-    res.json({
-
-        success: true,
-
-        data: {
-
-            totalStudents,
-
-            totalInstructors: 2,
-
-            totalCourses,
-
-            activeBatches,
-
-            totalFeedbackForms:
-                forms.length,
-
-            totalResponses,
-
-            feedbackResponseRate:
-                `${responseRate}%`
-
+const getAdminSummary = async (req, res) => {
+    try {
+        if (req.user.role !== "Admin") {
+            return res.status(403).json({
+                success: false,
+                message: "Admin access required"
+            });
         }
 
-    });
+        const [summaryRows, ratingRows, trendRows, issueRows] =
+            await Promise.all([
+                runDashboardQuery(`
+                    SELECT
+                        (SELECT COUNT(*) FROM students)
+                            AS totalStudents,
+
+                        (SELECT COUNT(*) FROM instructors)
+                            AS totalInstructors,
+
+                        (SELECT COUNT(*) FROM courses)
+                            AS totalCourses,
+
+                        (SELECT COUNT(*)
+                         FROM batches
+                         WHERE is_active = 1)
+                            AS activeBatches,
+
+                        (SELECT COUNT(*) FROM feedback_forms)
+                            AS totalFeedbackForms,
+
+                        (SELECT COUNT(*) FROM feedback_submissions)
+                            AS totalResponses,
+
+                        (
+                            SELECT COUNT(DISTINCT
+                                CONCAT(e.student_id, '-', ff.id))
+                            FROM enrollments e
+                            JOIN batches b
+                                ON b.id = e.batch_id
+                            JOIN feedback_forms ff
+                                ON ff.batch_id = b.id
+                            WHERE b.is_active = 1
+                              AND ff.is_active = 1
+                        ) AS eligiblePairs,
+
+                        (
+                            SELECT COUNT(DISTINCT
+                                CONCAT(fs.student_id, '-', fs.form_id))
+                            FROM feedback_submissions fs
+                            JOIN feedback_forms ff
+                                ON ff.id = fs.form_id
+                            JOIN batches b
+                                ON b.id = ff.batch_id
+                            JOIN enrollments e
+                                ON e.student_id = fs.student_id
+                               AND e.batch_id = b.id
+                            WHERE b.is_active = 1
+                              AND ff.is_active = 1
+                        ) AS submittedPairs
+                `),
+
+                runDashboardQuery(`
+                    SELECT
+                        LOWER(fq.section) AS section,
+                        ROUND(AVG(fo.option_value), 2)
+                            AS averageRating,
+                        COUNT(rr.id) AS ratingCount
+                    FROM rating_responses rr
+                    JOIN feedback_questions fq
+                        ON fq.id = rr.question_id
+                    JOIN feedback_options fo
+                        ON fo.id = rr.option_id
+                       AND fo.question_id = fq.id
+                    JOIN feedback_submissions fs
+                        ON fs.id = rr.submission_id
+                    JOIN feedback_forms ff
+                        ON ff.id = fs.form_id
+                    WHERE ff.is_active = 1
+                      AND fo.option_value BETWEEN 1 AND 5
+                    GROUP BY LOWER(fq.section)
+                `),
+
+                runDashboardQuery(`
+                    SELECT
+                        DATE_FORMAT(fs.submitted_at, '%Y-%m')
+                            AS month,
+                        COUNT(*) AS responses
+                    FROM feedback_submissions fs
+                    GROUP BY DATE_FORMAT(fs.submitted_at, '%Y-%m')
+                    ORDER BY month DESC
+                    LIMIT 6
+                `),
+
+                runDashboardQuery(`
+                    SELECT
+                        tr.response_type AS issueType,
+                        LEFT(tr.response_text, 120) AS issue,
+                        COUNT(*) AS mentions
+                    FROM text_responses tr
+                    WHERE tr.response_text IS NOT NULL
+                      AND TRIM(tr.response_text) <> ''
+                    GROUP BY tr.response_type, tr.response_text
+                    ORDER BY mentions DESC
+                    LIMIT 4
+                `)
+            ]);
+
+        const summary = summaryRows[0] || {};
+
+        const totalStudents = Number(summary.totalStudents || 0);
+        const totalInstructors = Number(summary.totalInstructors || 0);
+        const totalCourses = Number(summary.totalCourses || 0);
+        const activeBatches = Number(summary.activeBatches || 0);
+        const totalFeedbackForms = Number(summary.totalFeedbackForms || 0);
+        const totalResponses = Number(summary.totalResponses || 0);
+        const eligiblePairs = Number(summary.eligiblePairs || 0);
+        const submittedPairs = Number(summary.submittedPairs || 0);
+
+        const responseRate = eligiblePairs > 0
+            ? Number(
+                Math.min(100, submittedPairs / eligiblePairs * 100)
+                    .toFixed(2)
+            )
+            : 0;
+
+        const ratingsBySection = {
+            instructor: 0,
+            course: 0,
+            facilities: 0
+        };
+
+        let ratingSum = 0;
+        let ratingCount = 0;
+
+        for (const row of ratingRows) {
+            const section = String(row.section || "")
+                .toLowerCase()
+                .trim();
+
+            const average = Number(row.averageRating || 0);
+            const count = Number(row.ratingCount || 0);
+
+            if (Object.prototype.hasOwnProperty.call(
+                ratingsBySection, section
+            )) {
+                ratingsBySection[section] = average;
+            }
+
+            ratingSum += average * count;
+            ratingCount += count;
+        }
+
+        const overallRating = ratingCount > 0
+            ? Number((ratingSum / ratingCount).toFixed(2))
+            : 0;
+
+        return res.json({
+            success: true,
+            data: {
+                totalStudents,
+                totalInstructors,
+                totalCourses,
+                activeBatches,
+                totalFeedbackForms,
+                totalResponses,
+                eligiblePairs,
+                submittedPairs,
+                feedbackResponseRate: `${responseRate}%`,
+                responseRate,
+                overallRating,
+                ratingsBySection,
+                responseTrend: trendRows.reverse().map(row => ({
+                    month: row.month,
+                    responses: Number(row.responses || 0)
+                })),
+                topIssues: issueRows.map(row => ({
+                    type: row.issueType,
+                    issue: row.issue,
+                    mentions: Number(row.mentions || 0)
+                }))
+            }
+        });
+    } catch (error) {
+        console.error("Admin summary error:", error.message);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to load admin dashboard summary."
+        });
+    }
 };
 
 
