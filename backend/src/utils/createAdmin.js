@@ -5,7 +5,12 @@ const db = require("../config/db");
 
 const adminName = "System Admin";
 const adminEmail = "admin@aicfs.com";
-const adminPassword = "Admin@12345";
+const adminPassword = process.env.ADMIN_PASSWORD;
+
+if (!adminPassword) {
+    console.error("ADMIN_PASSWORD is missing from backend .env");
+    process.exit(1);
+}
 
 const sql = `
     SELECT id
@@ -73,7 +78,7 @@ db.query(sql, async (err, results) => {
 
                 console.log("Admin created successfully.");
                 console.log("Email:", adminEmail);
-                console.log("Password:", adminPassword);
+                // console.log("Password:", adminPassword);
                 console.log("User ID:", result.insertId);
 
                 process.exit(0);

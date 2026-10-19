@@ -1,4 +1,8 @@
 require("dotenv").config();
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
+    console.error("ERROR: JWT_SECRET is missing or too short in backend/.env");
+    process.exit(1);
+}
 
 const express = require("express");
 const cors = require("cors");

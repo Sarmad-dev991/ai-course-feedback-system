@@ -98,7 +98,7 @@ const login = (req, res) => {
                     role: user.role,
                     studentId: user.student_id || null
                 },
-                process.env.JWT_SECRET || "development_secret",
+                process.env.JWT_SECRET,
                 {
                     expiresIn: "1h"
                 }
